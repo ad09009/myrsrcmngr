@@ -8,7 +8,7 @@ class Resource(models.Model):
         return self.name
     
 class scans(models.Model):
-    call_date = models.DateTimeField(auto_now_add=True)
+    create_date = models.DateTimeField(auto_now_add=True)
     template_id = models.IntegerField()
     status = models.SmallIntegerField()
     parsed = models.BooleanField()
