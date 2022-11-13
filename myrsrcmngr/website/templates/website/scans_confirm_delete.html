@@ -1,0 +1,13 @@
+{% extends "receptes/base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% translate 'Delete recipe' %}</h1>
+
+<p>{% translate 'Are you sure you want to delete the recipe:' %} {{ recipe.RecipeName }}?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" class = "btn btn-danger" value="{% translate 'Yes, delete' %}">
+  <input type="submit" class = "btn btn-primary" value="{% translate 'Cancel' %}" onclick="window.location.href='{% url 'users:profile-home' user.profile.id %}';return false;">
+</form>
+{% endblock %}

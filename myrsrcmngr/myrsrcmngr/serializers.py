@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Resource
+from website.models import resourcegroups
 
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Resource
+        model = resourcegroups
         fields = ['id', 'name', 'description', 'add_date']
