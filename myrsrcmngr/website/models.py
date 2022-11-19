@@ -96,7 +96,7 @@ class services(models.Model):
     reports_belonging_to = models.ManyToManyField("reports", blank = True)
     
 class reports(models.Model):
-    port = models.IntegerField()
+    resourcegroups_id = models.ForeignKey(resourcegroups, on_delete=models.CASCADE)
     prev_rep_id = models.IntegerField(blank=True, null=True)
     started_int = models.IntegerField(blank=True, null=True)
     endtime_int = models.IntegerField(blank=True, null=True)
@@ -115,7 +115,8 @@ class reports(models.Model):
     is_consistent = models.BooleanField(blank=True, null=True)
     scan_id = models.ForeignKey(scans, null=True, on_delete=models.SET_NULL)
     to_services = models.ManyToManyField("services", blank = True, through = "services_added_removed")
-
+    is_last = models.BooleanField(default=False)
+    
 class changes(models.Model):
     attribute = models.CharField(max_length=100, blank=True, null=True)
     cur_val = models.CharField(max_length=200)

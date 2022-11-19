@@ -12,6 +12,63 @@ from website.models import scans, resourcegroups, hosts, reports, services, serv
 
 def parse_call(xml_result, filepath, scanid):
     print("now we parse")
+    
+    #get prev rep id that had the scanid
+    try:
+        previous = reports.objects.filter(scan_id=scanid, is_last=True)[0]
+    except:
+        print("did not find i guess")
+        previous = None
+    try:
+        newrep = NmapParser.parse_fromstring(xml_result)
+    except:
+        #insert placeholders and error description and path
+        print("could not parse new report from string")
+        newrep = 0
+    rgroup = resourcegroups.objects.get(scans__id=scanid)
+    scanretrieved = scans.objects.get(id=scanid)
+    created_rep = reports.objects.create(
+                resourcegroups_id = rgroup,
+                started_int = newrep.started,
+                endtime_int = newrep.endtime,
+                started_str = newrep.startedstr,
+                endtime_str = newrep.endtimestr,
+                version = newrep.version,
+                scan_type = newrep.scan_type,
+                num_services = newrep.numservices,
+                elapsed = newrep.elapsed,
+                hosts_up = newrep.hosts_up,
+                hosts_down = newrep.hosts_down,
+                hosts_total = newrep.hosts_total,
+                summary = newrep.summary,
+                full_cmndline = newrep.commandline,
+                path_to = filepath,
+                is_consistent = newrep.is_consistent(),
+                scan_id = scanretrieved,
+                is_last = True
+    )
+    oldrep = False
+    if previous:
+        previous.is_last = False
+        previous.save()
+        try:
+            oldrep = NmapParser.parse_fromfile(previous.path_to)
+        except:
+            oldrep = False
+            print("could not read in old report")
+    if oldrep:
+        created_rep.prev_rep_id = previous.id    
+        created_rep.save()
+ 
+            
+    
+    
+    
+    
+    
+    
+    
+    
     return 1
 
 def scan_call():
