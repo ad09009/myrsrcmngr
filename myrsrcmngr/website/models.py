@@ -15,9 +15,13 @@ class scans(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     scanAuthor = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)
     updated_at = models.DateTimeField(auto_now = True, null=True)
+    last_executed = models.DateTimeField(blank=True, null=True)
+    next_execution_at = models.DateTimeField(null=True)
     scanName = models.CharField(max_length=100)
     status = models.SmallIntegerField(blank=True, null=True)
     params = models.CharField(max_length=200, blank=True, null=True)
+    active = models.BooleanField(blank=True, null=True)
+    resourcegroups_id = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
     
     #scan_templates
     viens = '-oX -vvv --stats-every 1s --top-ports 100 -T2'
@@ -34,10 +38,12 @@ class scans(models.Model):
     )
     
     #scan_schedule
+    halfhourly = 'hh'
     hourly = 'h'
     daily = 'd'
     weekly = 'w'
     SCAN_SCHEDULES = [
+        (halfhourly, 'Every half hour'),
         (hourly, 'Every hour'),
         (daily, 'Every day'),
         (weekly, 'Every week'),

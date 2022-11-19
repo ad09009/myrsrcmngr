@@ -12,7 +12,6 @@ def about(request):
 class ScanCreateView(OwnerCreateView):
     model = scans
     fields = ['scanName', 'ScanTemplate', 'ScanSchedule']
-
     # By convention:
     # template_name = "receptes/scans_form.html"
 
