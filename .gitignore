@@ -1,6 +1,8 @@
 kvald/
 scanner3/
 base.xml
+myrsrcmngr/website/logs/*.log
+myrsrcmngr/website/reports/*.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
