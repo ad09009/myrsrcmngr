@@ -19,14 +19,20 @@ class scans(models.Model):
     next_execution_at = models.DateTimeField(null=True)
     scanName = models.CharField(max_length=100)
     status = models.SmallIntegerField(blank=True, null=True)
+    #0 - self.DONE,
+    #1 - self.READY,
+    #2 - self.RUNNING,
+    #3 - self.CANCELLED,
+    #4 - self.FAILED
+    
     params = models.CharField(max_length=200, blank=True, null=True)
     active = models.BooleanField(blank=True, null=True)
     resourcegroups_id = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
     
     #scan_templates
     viens = '-oX -vvv --stats-every 1s --top-ports 100 -T2'
-    divi = '-oX -vvv --stats-every 1s --top-ports 100 -T3'
-    tris = '-oX -vvv --stats-every 1s --top-ports 100 -T4'
+    divi = '--stats-every 1s --top-ports 100 -T3'
+    tris = '--stats-every 1s --top-ports 100 -T4'
     SCAN_TEMPLATES = [
         (viens, 'Pirmais variants'),
         (divi, 'Otrais variants'),

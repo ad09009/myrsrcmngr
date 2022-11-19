@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'myrsrcmngr',
     'users.apps.UsersConfig',
     'website.apps.WebsiteConfig',
+    'jobs.apps.JobsConfig',
     'crispy_forms',
     
     'django.contrib.admin',
