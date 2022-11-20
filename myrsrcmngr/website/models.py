@@ -78,6 +78,8 @@ class hosts(models.Model):
     distance = models.IntegerField(blank=True, null=True)
     resourcegroup_id = models.ForeignKey(resourcegroups, null = True, on_delete=models.SET_NULL)
     reports_belonging_to = models.ManyToManyField("reports", blank = True)
+    is_removed = models.BooleanField(blank=True, null=True)
+    is_added = models.BooleanField(blank=True, null=True)
     
 class services(models.Model):
     port = models.IntegerField()
@@ -85,6 +87,7 @@ class services(models.Model):
     protocol = models.CharField(max_length=50, blank=True, null=True)
     name_conc = models.CharField(max_length=200, blank=True, null=True)
     reason = models.CharField(max_length=100,blank=True, null=True)
+    reason_ip = models.CharField(max_length=100,blank=True, null=True)
     reason_ttl = models.CharField(max_length=100, blank=True, null=True)
     service = models.CharField(max_length=150, blank=True, null=True)
     owner = models.CharField(max_length=100, blank=True, null=True)
@@ -92,11 +95,12 @@ class services(models.Model):
     servicefp = models.CharField(max_length=200, blank=True, null=True)
     tunnel = models.CharField(max_length=100, blank=True, null=True)
     is_removed = models.BooleanField(blank=True, null=True)
+    is_added = models.BooleanField(blank=True, null=True)
     host_id = models.ForeignKey(hosts, on_delete=models.CASCADE)
     reports_belonging_to = models.ManyToManyField("reports", blank = True)
     
 class reports(models.Model):
-    resourcegroups_id = models.ForeignKey(resourcegroups, on_delete=models.CASCADE)
+    resourcegroups_id = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
     prev_rep_id = models.IntegerField(blank=True, null=True)
     started_int = models.IntegerField(blank=True, null=True)
     endtime_int = models.IntegerField(blank=True, null=True)
@@ -110,12 +114,13 @@ class reports(models.Model):
     hosts_down = models.IntegerField(blank=True, null=True)
     hosts_total = models.IntegerField(blank=True, null=True)
     summary = models.CharField(max_length=400,blank=True, null=True)
-    full_cmndline = models.CharField(max_length=300)
+    full_cmndline = models.CharField(max_length=300, blank=True, null=True)
     path_to = models.CharField(max_length=400, blank=True, null=True)
     is_consistent = models.BooleanField(blank=True, null=True)
     scan_id = models.ForeignKey(scans, null=True, on_delete=models.SET_NULL)
     to_services = models.ManyToManyField("services", blank = True, through = "services_added_removed")
     is_last = models.BooleanField(default=False)
+    parse_success = models.BooleanField(default=True)
     
 class changes(models.Model):
     attribute = models.CharField(max_length=100, blank=True, null=True)

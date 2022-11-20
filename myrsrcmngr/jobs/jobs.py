@@ -9,67 +9,144 @@ from django.utils import timezone
 #import models
 from website.models import scans, resourcegroups, hosts, reports, services, services_added_removed, changes
 
-
-def parse_call(xml_result, filepath, scanid):
-    print("now we parse")
-    
-    #get prev rep id that had the scanid
+def new_parse(xml_result, filepath, scanid):
+    status = True
+    newrep = 0
     try:
-        previous = reports.objects.filter(scan_id=scanid, is_last=True)[0]
+        rgroup = resourcegroups.objects.get(scans__id=scanid)
+        scanretrieved = scans.objects.get(id=scanid)
     except:
-        print("did not find i guess")
-        previous = None
+        print("necessary objects - rgroup and scan - not found")
+        status = False
     try:
         newrep = NmapParser.parse_fromstring(xml_result)
     except:
-        #insert placeholders and error description and path
         print("could not parse new report from string")
-        newrep = 0
-    rgroup = resourcegroups.objects.get(scans__id=scanid)
-    scanretrieved = scans.objects.get(id=scanid)
-    created_rep = reports.objects.create(
-                resourcegroups_id = rgroup,
-                started_int = newrep.started,
-                endtime_int = newrep.endtime,
-                started_str = newrep.startedstr,
-                endtime_str = newrep.endtimestr,
-                version = newrep.version,
-                scan_type = newrep.scan_type,
-                num_services = newrep.numservices,
-                elapsed = newrep.elapsed,
-                hosts_up = newrep.hosts_up,
-                hosts_down = newrep.hosts_down,
-                hosts_total = newrep.hosts_total,
-                summary = newrep.summary,
-                full_cmndline = newrep.commandline,
-                path_to = filepath,
-                is_consistent = newrep.is_consistent(),
-                scan_id = scanretrieved,
-                is_last = True
+        status = False
+    if status:
+        try:
+            created_rep = reports.objects.create(
+                        resourcegroups_id = rgroup,
+                        started_int = newrep.started,
+                        endtime_int = newrep.endtime,
+                        started_str = newrep.startedstr,
+                        endtime_str = newrep.endtimestr,
+                        version = newrep.version,
+                        scan_type = newrep.scan_type,
+                        num_services = newrep.numservices,
+                        elapsed = newrep.elapsed,
+                        hosts_up = newrep.hosts_up,
+                        hosts_down = newrep.hosts_down,
+                        hosts_total = newrep.hosts_total,
+                        summary = newrep.summary,
+                        full_cmndline = newrep.commandline,
+                        path_to = filepath,
+                        is_consistent = newrep.is_consistent(),
+                        scan_id = scanretrieved,
+                        is_last = True,
+                        parse_success = status
+            )
+            return (created_rep, newrep)
+        except:
+            print("parsing or report insert failed")
+            status = False
+    failed_rep = reports.objects.create(
+                        summary = "Report parsing failed",
+                        path_to = filepath,
+                        is_last = False,
+                        parse_success = status
     )
-    oldrep = False
-    if previous:
-        previous.is_last = False
-        previous.save()
+    return (failed_rep, newrep)
+
+def get_prev_rep(scanid):
+    previous = 0
+    oldrep = 0
+    try:
+        previous = reports.objects.filter(scan_id=scanid, is_last=True)[0]
         try:
             oldrep = NmapParser.parse_fromfile(previous.path_to)
         except:
-            oldrep = False
-            print("could not read in old report")
-    if oldrep:
-        created_rep.prev_rep_id = previous.id    
-        created_rep.save()
- 
+            print("could not parse previous from file")
+            oldrep = 0
+    except:
+        print("did not find i guess")
+        previous = 0
+    return (previous, oldrep)
+
+def main_input(newrep, created_rep):
+    
+    for ahost in newrep.hosts:
+        
+        defaults_hosts = {
+                    'mac':ahost.mac,
+                    'vendor':ahost.vendor,
+                    'ipv6':ahost.ipv6,
+                    'status':ahost.status,
+                    'hostnames':", ".join(ahost.hostnames),
+                    'os_fingerprint':ahost.os_fingerprint,
+                    'tcpsequence':ahost.tcpsequence,
+                    'ipsequence':ahost.ipsequence,
+                    'uptime':ahost.uptime,
+                    'lastboot':ahost.lastboot,
+                    'distance':ahost.distance,
+                    'resourcegroup_id':created_rep.resourcegroups_id
+        }
+        host_obj, host_created = hosts.objects.update_or_create(main_address=ahost.address, defaults=defaults_hosts)
+        created_rep.hosts_set.add(host_obj)
+        for aserv in ahost.services:
+            defaults_services = {
+                    'protocol':aserv.protocol,
+                    'state':aserv.state,
+                    'name_conc':"{0}/{1} {2} {3}".format(aserv.port, aserv.protocol, aserv.state, aserv.service),
+                    'reason':aserv.reason,
+                    'reason_ip':aserv.reason_ip,
+                    'reason_ttl':aserv.reason_ttl,
+                    'service':aserv.service,
+                    'owner':aserv.owner,
+                    'banner':aserv.banner,
+                    'servicefp':aserv.servicefp,
+                    'tunnel':aserv.tunnel
+            }
+            serv_obj, serv_created = services.objects.update_or_create(host_id=host_obj, port=aserv.port, defaults=defaults_services)
+            host_obj.services_set.add(serv_obj)
+            created_rep.services_set.add(serv_obj)
             
+    return True
+
+def diff_input(newrep, oldrep):
     
-    
-    
-    
-    
-    
-    
-    
-    return 1
+    return True
+
+def parse_call(xml_result, filepath, scanid):
+    print("now we parse")
+    #get prev rep id that had the scanid
+    prev_tuple = get_prev_rep(scanid)
+    previous = prev_tuple[0]
+    oldrep = prev_tuple[1]
+    #parse new report file
+    rep_tuple = new_parse(xml_result, filepath, scanid)
+    created_rep = rep_tuple[0]
+    newrep = rep_tuple[1]
+    if created_rep.parse_success:
+        print("go with the rest")
+        main_stat = main_input(newrep, created_rep)
+        if previous and oldrep:
+            print("we will do a diff")
+            previous.is_last = False
+            previous.save()
+            diff_stat = diff_input(newrep, oldrep)
+            
+        else:
+            print("no prev rep, so just the inserts please")
+            
+    else:
+        print("new rep was not parsed")
+        if previous:
+            created_rep.prev_rep_id = previous.id    
+            created_rep.save()
+        return False
+    return True
+
 
 def scan_call():
     #check for active scan
@@ -108,7 +185,7 @@ def scan_call():
         if scan_subnet is not None:
             targets = scan_subnet
         else: 
-            if len(all_hosts) < 1:
+            if all_hosts.count() < 1:
                 print("no hosts to run nmap on") #replace with log
                 return 1
             else:
