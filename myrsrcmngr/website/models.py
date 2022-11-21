@@ -118,7 +118,8 @@ class reports(models.Model):
     path_to = models.CharField(max_length=400, blank=True, null=True)
     is_consistent = models.BooleanField(blank=True, null=True)
     scan_id = models.ForeignKey(scans, null=True, on_delete=models.SET_NULL)
-    to_services = models.ManyToManyField("services", blank = True, through = "services_added_removed")
+    services_a_r = models.ManyToManyField(services, blank = True, through = "services_added_removed", through_fields=('cur_report','service'))
+    hosts_a_r = models.ManyToManyField(hosts, blank = True, through = "hosts_added_removed", through_fields=('cur_report','host'))
     is_last = models.BooleanField(default=False)
     parse_success = models.BooleanField(default=True)
     
@@ -134,6 +135,12 @@ class changes(models.Model):
 
 class services_added_removed(models.Model):
     status = models.CharField(max_length=20)
-    prev_report_id = models.ForeignKey(reports, null=True, on_delete=models.SET_NULL)
-    service_id = models.ForeignKey(services, on_delete=models.CASCADE)
+    prev_report_id = models.ForeignKey(reports, null=True, related_name="previous_report", on_delete=models.SET_NULL)
+    cur_report = models.ForeignKey(reports, on_delete=models.CASCADE)
+    service = models.ForeignKey(services, on_delete=models.CASCADE)
     
+class hosts_added_removed(models.Model):
+    status = models.CharField(max_length=20)
+    prev_report_id = models.ForeignKey(reports, null=True, related_name="previous_report_hosts", on_delete=models.SET_NULL)
+    cur_report = models.ForeignKey(reports, on_delete=models.CASCADE)
+    host = models.ForeignKey(hosts, on_delete=models.CASCADE)

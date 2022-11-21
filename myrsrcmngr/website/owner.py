@@ -10,18 +10,7 @@ class OwnerCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         object = form.save(commit=False) # don`t commit yet, have to pass the user as owner first
         object.scanAuthor = self.request.user
-        schedule = self.request.POST["ScanSchedule"]
-        if schedule == 'hh':
-            next_at_delta = timedelta(minutes=30)
-        elif schedule == 'h':
-            next_at_delta = timedelta(hours=1)
-        elif schedule == 'd':
-            next_at_delta = timedelta(days=1)
-        elif schedule == 'w':
-            next_at_delta = timedelta(days=7)
-        else:
-            next_at_delta = timedelta(minutes=15)
-        object.next_execution_at = datetime.now() + next_at_delta
+        object.next_execution_at = datetime.now()
         it = object.save()
         return super(OwnerCreateView, self).form_valid(form)
     
