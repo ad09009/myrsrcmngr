@@ -27,7 +27,7 @@ class scans(models.Model):
     
     params = models.CharField(max_length=200, blank=True, null=True)
     active = models.BooleanField(blank=True, null=True)
-    resourcegroups = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
+    resourcegroup = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
     
     #scan_templates
     viens = '-oX -vvv --stats-every 1s --top-ports 100 -T2'
@@ -100,8 +100,8 @@ class services(models.Model):
     reports_belonging_to = models.ManyToManyField("reports", blank = True)
     
 class reports(models.Model):
-    resourcegroups = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
-    prev_rep_id = models.IntegerField(blank=True, null=True)
+    resourcegroup = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
+    prev_rep = models.IntegerField(blank=True, null=True)
     started_int = models.IntegerField(blank=True, null=True)
     endtime_int = models.IntegerField(blank=True, null=True)
     started_str = models.CharField(max_length=200, blank=True, null=True)
@@ -131,7 +131,7 @@ class changes(models.Model):
     cur_report = models.ForeignKey(reports, on_delete=models.CASCADE)
     host = models.ForeignKey(hosts, blank=True, null=True, on_delete=models.SET_NULL)
     service = models.ForeignKey(services, blank=True, null=True, on_delete=models.SET_NULL)
-    prev_rep_id = models.IntegerField(blank=True, null=True)
+    prev_rep = models.IntegerField(blank=True, null=True)
 
 class services_added_removed(models.Model):
     status = models.CharField(max_length=20)

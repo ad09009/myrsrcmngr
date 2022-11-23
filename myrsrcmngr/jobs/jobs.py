@@ -26,7 +26,7 @@ def new_parse(xml_result, filepath, scanid):
     if status:
         try:
             created_rep = reports.objects.create(
-                        resourcegroups_id = rgroup,
+                        resourcegroup = rgroup,
                         started_int = newrep.started,
                         endtime_int = newrep.endtime,
                         started_str = newrep.startedstr,
@@ -42,7 +42,7 @@ def new_parse(xml_result, filepath, scanid):
                         full_cmndline = newrep.commandline,
                         path_to = filepath,
                         is_consistent = newrep.is_consistent(),
-                        scan_id = scanretrieved,
+                        scan = scanretrieved,
                         is_last = True,
                         parse_success = status
             )
@@ -62,7 +62,7 @@ def get_prev_rep(scanid):
     previous = 0
     oldrep = 0
     try:
-        previous = reports.objects.filter(scan_id=scanid, is_last=True)[0]
+        previous = reports.objects.filter(scan=scanid, is_last=True)[0]
         try:
             oldrep = NmapParser.parse_fromfile(previous.path_to)
         except:
@@ -90,7 +90,7 @@ def main_input(newrep, created_rep):
                         'uptime':ahost.uptime,
                         'lastboot':ahost.lastboot,
                         'distance':ahost.distance,
-                        'resourcegroup_id':created_rep.resourcegroups_id
+                        'resourcegroup':created_rep.resourcegroup
             }
             host_obj, host_created = hosts.objects.update_or_create(main_address=ahost.address, defaults=defaults_hosts)
             #print("inserted or upd host: ", host_obj, host_created)
@@ -109,7 +109,7 @@ def main_input(newrep, created_rep):
                         'servicefp':aserv.servicefp,
                         'tunnel':aserv.tunnel
                 }
-                serv_obj, serv_created = services.objects.update_or_create(host_id=host_obj, port=aserv.port, defaults=defaults_services)
+                serv_obj, serv_created = services.objects.update_or_create(host=host_obj, port=aserv.port, defaults=defaults_services)
                 #print("inserted or upd service: ", serv_obj, serv_created)
                 host_obj.services_set.add(serv_obj)
                 created_rep.services_set.add(serv_obj)
@@ -139,8 +139,8 @@ def diff_input(newrep, oldrep, created_rep, previous):
                 cur_val = str(getattr(newrep, attr)),
                 prev_val = str(getattr(oldrep, attr)),
                 status = "CHANGED",
-                cur_report_id = created_rep,
-                prev_rep_id = previous.id
+                cur_report = created_rep,
+                prev_rep = previous.id
             )
             print("attr_change: ", attr, attr_change)
             print("one more time: ", attr)
@@ -160,11 +160,11 @@ def diff_input(newrep, oldrep, created_rep, previous):
                             if nestserv[0] == "NmapService":
                                 #add service to db
                                 aservice = curhost.get_service_byid(nestserv[1])
-                                dbservice_a = services.objects.get(host_id__main_address=curhost.address, port=aservice.port)
+                                dbservice_a = services.objects.get(host__main_address=curhost.address, port=aservice.port)
                                 servadr = services_added_removed.objects.create(
                                     cur_report=created_rep,
                                     service=dbservice_a,
-                                    prev_report_id=previous,
+                                    prev_report=previous,
                                     status="ADDED"
                                 )
                                 print("addserv: ", servadr)
@@ -177,11 +177,11 @@ def diff_input(newrep, oldrep, created_rep, previous):
                             if nestserv[0] == "NmapService":
                                 #add service to db
                                 rservice = prevhost.get_service_byid(nestserv[1])
-                                dbservice_r = services.objects.get(host_id__main_address=curhost.address, port=rservice.port)
+                                dbservice_r = services.objects.get(host__main_address=curhost.address, port=rservice.port)
                                 servrem = services_added_removed.objects.create(
                                     cur_report=created_rep,
                                     service=dbservice_r,
-                                    prev_report_id=previous,
+                                    prev_report=previous,
                                     status="REMOVED"
                                 )
                                 print("remserv: ", servrem)
@@ -201,17 +201,17 @@ def diff_input(newrep, oldrep, created_rep, previous):
                                     if nestedserv is not None:
                                         print("WTF?")
                                     else:
-                                        dbcserv = services.objects.get(host_id___main_address=curhost.address, port=cservice.port)
-                                        dbchost = dbcserv.host_id
+                                        dbcserv = services.objects.get(host___main_address=curhost.address, port=cservice.port)
+                                        dbchost = dbcserv.host
                                         servattrch = changes.objects.create(
                                             attribute = servattr,
                                             cur_val = str(getattr(cservice, servattr)),
                                             prev_val = str(getattr(pservice, servattr)),
                                             status = "CHANGED",
-                                            cur_report_id = created_rep,
-                                            prev_rep_id = previous.id,
-                                            host_id = dbchost,
-                                            service_id = dbcserv
+                                            cur_report = created_rep,
+                                            prev_rep = previous.id,
+                                            host = dbchost,
+                                            service = dbcserv
                                         )
                                         print("changes servattr: ", servattrch)
                                 for addattr in serv_diff.added():
@@ -228,9 +228,9 @@ def diff_input(newrep, oldrep, created_rep, previous):
                                 cur_val = str(getattr(curhost, chserv)),
                                 prev_val = str(getattr(prevhost, chserv)),
                                 status = "CHANGED",
-                                cur_report_id = created_rep,
-                                prev_rep_id = previous.id,
-                                host_id = dbchost2
+                                cur_report = created_rep,
+                                prev_rep = previous.id,
+                                host = dbchost2
                             )
                             print("changes chserv: ", chserv, chservch)
     
@@ -244,16 +244,16 @@ def diff_input(newrep, oldrep, created_rep, previous):
                 hadr = hosts_added_removed.objects.create(
                     cur_report=created_rep,
                     host=dbhost_a,
-                    prev_report_id=previous,
+                    prev_report=previous,
                     status="ADDED"
                 )
                 print("hostsadded", add, hadr)
                 for aserv in ahost.services:
-                    dbserv_a = services.objects.get(host_id__main_address=ahost.address, port=aserv.port)
+                    dbserv_a = services.objects.get(host__main_address=ahost.address, port=aserv.port)
                     sadr = services_added_removed.objects.create(
                         cur_report=created_rep,
                         service=dbserv_a,
-                        prev_report_id=previous,
+                        prev_report=previous,
                         status="ADDED"
                     )
                     print("services added for added host", aserv, sadr)
@@ -268,16 +268,16 @@ def diff_input(newrep, oldrep, created_rep, previous):
                 hadrgone = hosts_added_removed.objects.create(
                     cur_report=created_rep,
                     host=dbhost_r,
-                    prev_report_id=previous,
+                    prev_report=previous,
                     status="REMOVED"
                 )
                 print("removed host", rem, hadrgone)
                 for rserv in rhost.services:
-                    dbserv_r = services.objects.get(host_id_main_address=rhost.address, port=rserv.port)
+                    dbserv_r = services.objects.get(host_main_address=rhost.address, port=rserv.port)
                     sadrgone = services_added_removed.objects.create(
                         cur_report=created_rep,
                         service=dbserv_r,
-                        prev_report_id=previous,
+                        prev_report=previous,
                         status="REMOVED"
                     )
                     print("services removed for removed host", rserv, sadrgone)
@@ -304,7 +304,7 @@ def parse_call(xml_result, filepath, scanid):
             print("we will do a diff")
             previous.is_last = False
             previous.save()
-            created_rep.prev_rep_id = previous.id    
+            created_rep.prev_rep = previous.id    
             created_rep.save()
             diff_stat = diff_input(newrep, oldrep, created_rep, previous)
             if diff_stat:
@@ -315,7 +315,7 @@ def parse_call(xml_result, filepath, scanid):
     else:
         print("new rep was not parsed")
         if previous:
-            created_rep.prev_rep_id = previous.id    
+            created_rep.prev_rep = previous.id    
             created_rep.save()
         return False
     return True
@@ -353,8 +353,8 @@ def scan_call():
         options = active_scan.ScanTemplate
         
         #take all hosts or subnet
-        scan_subnet = active_scan.resourcegroups_id.subnet
-        all_hosts = active_scan.resourcegroups_id.hosts_set.all()
+        scan_subnet = active_scan.resourcegroup.subnet
+        all_hosts = active_scan.resourcegroup.hosts_set.all()
         if scan_subnet is not None:
             targets = scan_subnet
         else: 
