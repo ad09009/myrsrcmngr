@@ -5,7 +5,7 @@
   <form action="" method="post">
     {% csrf_token %}
     {{ form|crispy }}
-    <input type="submit" class="btn btn-warning" value="Submit and Add Ingredients">
+    <input type="submit" class="btn btn-warning" value="Save">
     <input type="submit" class="btn btn-primary" value="Cancel" onclick="window.location.href='{% url 'website:index' %}';return false;">
   </form>
 </p>

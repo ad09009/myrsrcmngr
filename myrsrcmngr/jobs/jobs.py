@@ -201,7 +201,7 @@ def diff_input(newrep, oldrep, created_rep, previous):
                                     if nestedserv is not None:
                                         print("WTF?")
                                     else:
-                                        dbcserv = services.objects.get(host___main_address=curhost.address, port=cservice.port)
+                                        dbcserv = services.objects.get(host__main_address=curhost.address, port=cservice.port)
                                         dbchost = dbcserv.host
                                         servattrch = changes.objects.create(
                                             attribute = servattr,

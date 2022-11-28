@@ -3,6 +3,10 @@ scanner3/
 base.xml
 myrsrcmngr/website/logs/*.log
 myrsrcmngr/website/reports/*.xml
+myrsrcmngr/website/static/website/DataTables/
+myrsrcmngr/node_modules/
+package.json
+package-lock.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

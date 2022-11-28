@@ -1,9 +1,9 @@
-{% extends "receptes/base.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 {% block content %}
-<h1>{% translate 'Delete recipe' %}</h1>
+<h1>{% translate 'Delete scan' %}</h1>
 
-<p>{% translate 'Are you sure you want to delete the recipe:' %} {{ recipe.RecipeName }}?</p>
+<p>{% translate 'Are you sure you want to delete the scan:' %} {{ scans.scanName }}?</p>
 
 <form action="" method="POST">
   {% csrf_token %}
