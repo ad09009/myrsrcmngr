@@ -93,8 +93,8 @@
                         <th>Group</th>
                     </tr>
                 </tfoot>
-                {% for scan in scans_list %}
                 <tbody>
+                {% for scan in scans_list %}
                     <tr>
                         <td>{{ scan.create_date }}</td>
                         <td>{{ scan.last_executed }}</td>
@@ -104,8 +104,8 @@
                         <td>{{ scan.active }}</td>
                         <td>{{ scan.resourcegroup.name }}</td>
                     </tr>
-                </tbody>
                 {% endfor %}
+                </tbody>
             </table>
         {% else %}
             <p>'There are no scans in the database.' </p>

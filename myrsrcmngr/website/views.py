@@ -6,7 +6,19 @@ from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView
 from .models import scans, hosts, reports, resourcegroups
 
 def index(request):
-    return render(request, 'index.html', {})
+    con = {}
+    for rgroup in resourcegroups.objects.all().order_by('-updated_at')[:5]:
+        
+        try:
+            rreport = rgroup.reports_set.latest('id')
+            groupname = rgroup.name
+            con[groupname] = rreport
+        except rreport.DoesNotExist:
+            rreport = None
+    context = {
+        'con': con
+    }
+    return render(request, 'index.html', context)
 
 def about(request):
     return render(request, 'about.html', {})
