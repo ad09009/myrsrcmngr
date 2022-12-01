@@ -1,7 +1,13 @@
 from django.shortcuts import render
+from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
+from django.http import JsonResponse
+from django.contrib.humanize.templatetags.humanize import naturaltime
+from .serializers import ScansSerializer
+from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView
+
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups
 
@@ -46,9 +52,53 @@ class ScanDeleteView(OwnerDeleteView):
 class ScansListView(ListView):
     paginate_by = 5
     model = scans
-    ordering = ['updated_at']
+    ordering = ['next_execution_at']
     # By convention:
     # template_name = "website/scans_list.html"
+    
+@api_view(['GET'])
+def scans_list(request):
+    if request.method == 'GET':
+        allscans = scans.objects.all()
+        serializer = ScansSerializer(allscans, many=True)
+        return JsonResponse({"scans":serializer.data})
+
+@api_view(['GET'])
+def scan_progress(request):
+    if request.method == 'GET':
+        active_scan = scans.objects.all()
+        if active_scan:
+            
+            serializer = ScansSerializer(allscans, many=True)
+            return JsonResponse({"scans":serializer.data})       
+
+class ScanProgressView(View):
+    
+    def get(self, request, pk):
+        try:
+            mainscan = scans.objects.get(pk=pk)
+        except:
+            mainscan = None
+        scanreturn = {}
+        if mainscan:
+            scanreturn['scan'] = 1
+            scanreturn['scanname'] = mainscan.scanName
+            if mainscan.active:
+                scanreturn['active'] = 'On'
+                if mainscan.status == 2:
+                    scanreturn['status'] = mainscan.task_status
+                    scanreturn['name'] = mainscan.task_name
+                    scanreturn['etc'] = mainscan.task_etc
+                    scanreturn['progress'] = mainscan.task_progress
+                else:
+                    scanreturn['status'] = mainscan.status
+                    scanreturn['next_at'] = naturaltime(mainscan.next_execution_at)
+            else:
+                scanreturn['active'] = 'Off'
+        else:
+            scanreturn['scan'] = 0
+        
+        return JsonResponse(scanreturn, safe=False)
 
 class ScanDetailView(DetailView):
     model = scans

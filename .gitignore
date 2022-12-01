@@ -5,6 +5,7 @@ myrsrcmngr/website/logs/*.log
 myrsrcmngr/website/reports/*.xml
 myrsrcmngr/website/static/website/DataTables/
 myrsrcmngr/node_modules/
+myrsrcmngr/website/static/website/jquery-3.6.1.min.js
 package.json
 package-lock.json
 

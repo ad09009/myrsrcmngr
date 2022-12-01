@@ -370,6 +370,11 @@ def scan_call():
         while nmap_proc.is_running():
             nmaptask = nmap_proc.current_task
             if nmaptask:
+                active_scan.task_name = nmaptask.name
+                active_scan.task_status = nmaptask.status
+                active_scan.task_etc = nmaptask.etc
+                active_scan.task_progress = nmaptask.progress
+                active_scan.save()
                 print(
                     "Task {0} ({1}): ETC: {2} DONE: {3}%".format(
                         nmaptask.name, nmaptask.status, nmaptask.etc, nmaptask.progress

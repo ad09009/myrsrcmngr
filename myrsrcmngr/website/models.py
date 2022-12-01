@@ -24,7 +24,10 @@ class scans(models.Model):
     #2 - self.RUNNING,
     #3 - self.CANCELLED,
     #4 - self.FAILED
-    
+    task_name = models.CharField(max_length=50, blank=True, null=True)
+    task_status = models.CharField(max_length=30, blank=True, null=True)
+    task_etc = models.IntegerField(blank=True, null=True)
+    task_progress = models.FloatField(blank=True, null=True)
     params = models.CharField(max_length=200, blank=True, null=True)
     active = models.BooleanField(blank=True, null=True)
     resourcegroup = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
@@ -61,6 +64,11 @@ class scans(models.Model):
     
     def __str__(self):
         return 'Scan ' + self.scanName + ' at ' + str(self.create_date)
+    
+    def get_data(self):
+        return {
+            
+        }
     
 class hosts(models.Model):
     main_address = models.CharField(max_length=50)

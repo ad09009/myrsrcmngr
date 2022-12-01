@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'website.apps.WebsiteConfig',
     'jobs.apps.JobsConfig',
     'crispy_forms',
-    
+    'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
