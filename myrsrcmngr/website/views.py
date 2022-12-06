@@ -56,6 +56,15 @@ class ScansListView(ListView):
     # By convention:
     # template_name = "website/scans_list.html"
     
+@api_view(['POST', 'GET'])
+def scan_toggle(request, pk):
+    if request.method == 'POST':
+        active = request.POST.get('active')
+        scan = scans.objects.get(pk=pk)
+        scan.active = active
+        scan.save()
+        return JsonResponse({"active":active})
+
 @api_view(['GET'])
 def scans_list(request):
     if request.method == 'GET':
@@ -69,7 +78,7 @@ def scan_progress(request):
         active_scan = scans.objects.all()
         if active_scan:
             
-            serializer = ScansSerializer(allscans, many=True)
+            serializer = ScansSerializer(active_scan, many=True)
             return JsonResponse({"scans":serializer.data})       
 
 class ScanProgressView(View):
@@ -99,10 +108,10 @@ class ScanProgressView(View):
             scanreturn['scan'] = 0
         
         return JsonResponse(scanreturn, safe=False)
-
+        
+        
 class ScanDetailView(DetailView):
     model = scans
-
 #CRUD views for Hosts
 
 class HostCreateView(OwnerCreateView):
@@ -167,3 +176,4 @@ class ReportsListView(ListView):
 
 class ReportDetailView(DetailView):
     model = reports
+    

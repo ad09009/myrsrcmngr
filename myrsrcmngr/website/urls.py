@@ -11,6 +11,7 @@ urlpatterns = [
     path('scans/json/', views.scans_list),
     path('scans/<int:pk>/', views.ScanDetailView.as_view(), name='scan-detail'),
     path('scans/api/<int:pk>/', views.ScanProgressView.as_view(), name='scan-progress'),
+    path('scans/api/toggle/<int:pk>/', views.scan_toggle, name='scan-toggle'),
     path('groups/', views.ResourcegroupsListView.as_view(), name='groups-list'),
     path('reports/', views.ReportsListView.as_view(), name='reports-list'),
     path('hosts/', views.HostsListView.as_view(), name='hosts-list'),
