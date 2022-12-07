@@ -70,7 +70,7 @@
         </div>
         <div class="card-body">
         {% if scans_list %}
-            <table id="datatablesSimple2">
+            <table id="datatablesSimple" class="table">
                 <thead>
                     <tr>
                         <th>Last execution at</th>
@@ -96,10 +96,26 @@
                     <tr>
                         <td>{{ scan.last_executed }}</td>
                         <td>{{ scan.next_execution_at }}</td>
-                        <td><a href="{% url 'website:scan-detail' scan.pk %}"> >{{ scan.scanName }}</a></td>
-                        <td>{{ scan.status }}</td>
-                        <td>{{ scan.active }}</td>
-                        <td>{{ scan.resourcegroup.name }}</td>
+                        <td><a href="{% url 'website:scan-detail' scan.pk %}"> {{ scan.scanName }}</a></td>
+                        {% if scan.status == 0 %}
+                        <td class="table-success">DONE</td>
+                        {% elif scan.status == 1 %}
+                        <td class="table-success">READY</td>
+                        {% elif scan.status == 2 %}
+                        <td class="table-success">RUNNING</td>
+                        {% elif scan.status == 3 %}
+                        <td class="table-warning">CANCELLED</td>
+                        {% elif scan.status == 4 %}
+                        <td class="table-danger">FAILED</td>                        
+                        {% else %}
+                        <td class="table-default">NOT SET</td>
+                        {% endif %}
+                        {% if scan.active %}
+                        <td class="table-success">ON</td>
+                        {% else %}
+                        <td class="table-info">OFF</td>
+                        {% endif %}
+                        <td><a href="{% url 'website:groups-detail' scan.resourcegroup.id %}"> {{ scan.resourcegroup }}</a></td>
                     </tr>
                 {% endfor %}
 

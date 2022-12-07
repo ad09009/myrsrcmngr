@@ -13,13 +13,14 @@ from .models import scans, hosts, reports, resourcegroups
 
 def index(request):
     con = {}
+    rreport = None
     for rgroup in resourcegroups.objects.all().order_by('-updated_at')[:5]:
         
         try:
             rreport = rgroup.reports_set.latest('id')
             groupname = rgroup.name
             con[groupname] = rreport
-        except rreport.DoesNotExist:
+        except:
             rreport = None
     context = {
         'con': con
@@ -164,7 +165,7 @@ class ResourcegroupsListView(ListView):
 
 class ResourcegroupDetailView(DetailView):
     model = resourcegroups
-    
+    template_name = "website/resourcegroup_detail.html"
 
 # List and Detail view for Reports
 

@@ -161,13 +161,22 @@ def diff_input(newrep, oldrep, created_rep, previous):
                                 #add service to db
                                 aservice = curhost.get_service_byid(nestserv[1])
                                 dbservice_a = services.objects.get(host__main_address=curhost.address, port=aservice.port)
+                                host_to_serv = hosts.objects.get(main_address=curhost.address)
                                 servadr = services_added_removed.objects.create(
                                     cur_report=created_rep,
                                     service=dbservice_a,
                                     prev_report=previous,
                                     status="ADDED"
                                 )
+                                serv_in_changes = changes.objects.create(
+                                    cur_report=created_rep,
+                                    service=dbservice_a,
+                                    prev_rep=previous.id,
+                                    host = host_to_serv,
+                                    status="ADDED"
+                                )
                                 print("addserv: ", servadr)
+                                print("serv_in_changes: ", serv_in_changes)
                         else:
                             print("Was not expecting an attribute when parsing host diff added")
                     #print("{0} host has the following removed services:".format(curhost.address))
@@ -178,12 +187,21 @@ def diff_input(newrep, oldrep, created_rep, previous):
                                 #add service to db
                                 rservice = prevhost.get_service_byid(nestserv[1])
                                 dbservice_r = services.objects.get(host__main_address=curhost.address, port=rservice.port)
+                                host_from_serv = hosts.objects.get(main_address=curhost.address)
                                 servrem = services_added_removed.objects.create(
                                     cur_report=created_rep,
                                     service=dbservice_r,
                                     prev_report=previous,
                                     status="REMOVED"
                                 )
+                                remserv_in_changes = changes.objects.create(
+                                    cur_report=created_rep,
+                                    service=dbservice_r,
+                                    prev_rep=previous.id,
+                                    host = host_from_serv,
+                                    status="REMOVED"
+                                )
+                                print("remserv_in_changes: ", remserv_in_changes)
                                 print("remserv: ", servrem)
                         else:
                             print("Was not expecting an attribute when parsing host diff removed")
@@ -248,6 +266,13 @@ def diff_input(newrep, oldrep, created_rep, previous):
                     status="ADDED"
                 )
                 print("hostsadded", add, hadr)
+                hadr_ch = changes.objects.create(
+                    cur_report=created_rep,
+                    host=dbhost_a,
+                    prev_rep=previous.id,
+                    status="ADDED"
+                )
+                print("hostsadded", add, hadr_ch)
                 for aserv in ahost.services:
                     dbserv_a = services.objects.get(host__main_address=ahost.address, port=aserv.port)
                     sadr = services_added_removed.objects.create(
@@ -256,7 +281,14 @@ def diff_input(newrep, oldrep, created_rep, previous):
                         prev_report=previous,
                         status="ADDED"
                     )
-                    print("services added for added host", aserv, sadr)
+                    sadr_ch = changes.objects.create(
+                        cur_report=created_rep,
+                        service=dbserv_a,
+                        host=dbhost_a,
+                        prev_rep=previous.id,
+                        status="ADDED"
+                    )
+                    print("services added for added host", aserv, sadr, sadr_ch)
                 
     # print("Removed hosts and services: ")
     for rem in rep_ndiff.removed():
@@ -272,6 +304,13 @@ def diff_input(newrep, oldrep, created_rep, previous):
                     status="REMOVED"
                 )
                 print("removed host", rem, hadrgone)
+                hadrgone_ch = changes.objects.create(
+                    cur_report=created_rep,
+                    host=dbhost_r,
+                    prev_rep=previous.id,
+                    status="REMOVED"
+                )
+                print("removed host", rem, hadrgone_ch)
                 for rserv in rhost.services:
                     dbserv_r = services.objects.get(host_main_address=rhost.address, port=rserv.port)
                     sadrgone = services_added_removed.objects.create(
@@ -280,7 +319,14 @@ def diff_input(newrep, oldrep, created_rep, previous):
                         prev_report=previous,
                         status="REMOVED"
                     )
-                    print("services removed for removed host", rserv, sadrgone)
+                    sadrgone_ch = changes.objects.create(
+                        cur_report=created_rep,
+                        service=dbserv_r,
+                        host = dbhost_r,
+                        prev_rep=previous.id,
+                        status="REMOVED"
+                    )
+                    print("services removed for removed host", rserv, sadrgone, sadrgone_ch)
     print("Did not fail on the diff parse, wow")
     return True
 

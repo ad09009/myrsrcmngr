@@ -133,7 +133,7 @@ class reports(models.Model):
     
 class changes(models.Model):
     attribute = models.CharField(max_length=100, blank=True, null=True)
-    cur_val = models.CharField(max_length=200)
+    cur_val = models.CharField(max_length=200, blank=True, null=True)
     prev_val = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=70, blank=True, null=True)
     cur_report = models.ForeignKey(reports, on_delete=models.CASCADE)

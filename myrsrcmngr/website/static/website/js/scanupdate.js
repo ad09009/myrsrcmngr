@@ -90,7 +90,6 @@ function toggleActive() {
     // Flip the value of the "active" parameter
     var newValue = (currentValue === "0") ? "1" : "0";
     var url = $("#toggle-button").attr("scan-ajax-target");
-    console.log(url);
     // Use AJAX to send a POST request to update the value of the "active" parameter
     $.ajax({
       type: "POST",
@@ -117,13 +116,10 @@ function toggleActive() {
 
 
 $(document).ready(function(){
-    console.log("ready");
     $("#toggle-button").click(function(e){
-        console.log("click");
         e.preventDefault();
         toggleActive();
     });
-    console.log("ready2");
     $.ajaxSetup({ cache:false });
     updateMsg();
 
