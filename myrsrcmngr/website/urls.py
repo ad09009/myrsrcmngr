@@ -16,4 +16,7 @@ urlpatterns = [
     path('scans/api/toggle/<int:pk>/', views.scan_toggle, name='scan-toggle'),
     path('reports/', views.ReportsListView.as_view(), name='reports-list'),
     path('hosts/', views.HostsListView.as_view(), name='hosts-list'),
+    
+    path('search/', views.GlobalSearch, name='search'),
+    path('hosts/<int:pk>/', views.HostDetailView.as_view(), name='hosts-detail'),
 ]

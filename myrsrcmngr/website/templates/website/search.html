@@ -1,25 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container-fluid px-4">
-    <h1 class="mt-4">SCANS</h1>
+    <h1 class="mt-4">Search results</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Overview of all created scans</li>
+        {% if searched %}
+        <li class="breadcrumb-item active">You search for: {{searched}}</li>
     </ol>
     <div class="row">
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Some scan info
+                    Groups
                 </div>
-                <div class="card-body"></div>
+                <div class="card-body">
+                    <div class="card-body">
+                        {% if foundresourcegroups %}
+                        <ul class="list-group list-group-flush">
+                            {% for group in foundresourcegroups %}
+                            <li class="list-group-item list-group-item-action">
+                              <a href="{% url 'website:groups-detail' group.id %}">{{group.name}}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>No groups found </p>
+                        {% endif %} 
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Some other scan info
+                    Hosts
                 </div>
-                <div class="card-body"></div>
+                <div class="card-body">
+                    {% if foundhosts %}
+                        <ul class="list-group list-group-flush">
+                            {% for host in foundhosts %}
+                            <li class="list-group-item list-group-item-action">
+                              <a href="{% url 'website:hosts-detail' host.id %}">{{host.main_address}}</a>
+                            </li>
+                            {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No hosts found </p>
+                    {% endif %} 
+                </div>
             </div>
         </div>
     </div>
@@ -29,7 +56,7 @@
             Scans
         </div>
         <div class="card-body">
-        {% if scans_list %}
+        {% if foundscans %}
             <table id="datatablesSimple" class="table">
                 <thead>
                     <tr>
@@ -52,7 +79,7 @@
                     </tr>
                 </tfoot>
                 <tbody>
-                {% for scan in scans_list %}
+                {% for scan in foundscans %}
                     <tr>
                         <td>{{ scan.last_executed }}</td>
                         <td>{{ scan.next_execution_at }}</td>
@@ -82,9 +109,13 @@
                 </tbody>
             </table>
         {% else %}
-            <p>'There are no scans in the database.' </p>
+            <p>No scans found</p>
         {% endif %}
         </div>
     </div>
+    {% else %}
+            <li class="breadcrumb-item active">No search term entered</li>
+    </ol>
+    {% endif %}
 </div>
 {% endblock %}

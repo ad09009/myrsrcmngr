@@ -178,3 +178,15 @@ class ReportsListView(ListView):
 class ReportDetailView(DetailView):
     model = reports
     
+
+def GlobalSearch(request):
+    template_name = 'website/search.html'
+    if request.method == 'POST':
+        searched = request.POST.get('searched')
+        foundscans = scans.objects.filter(scanName__contains=searched)
+        foundhosts = hosts.objects.filter(main_address__contains=searched)
+        foundresourcegroups = resourcegroups.objects.filter(name__contains=searched)
+        
+        return render(request, template_name, {'searched': searched, 'foundscans':foundscans, 'foundhosts':foundhosts, 'foundresourcegroups':foundresourcegroups})
+    else:
+        return render(request, template_name, {})

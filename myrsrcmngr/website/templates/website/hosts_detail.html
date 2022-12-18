@@ -2,10 +2,10 @@
 {% load static %}
 {% block content %}
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Scan: {{ scans.scanName | upper }}</h1>
+    <h1 class="mt-4">Host: {{ hosts.main_address | upper }}</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Group: 
-            <a class="nav-link" href="{% url 'website:groups-detail' scans.resourcegroup.id %}">{{ scans.resourcegroup | upper }}</a>
+        <li class="breadcrumb-item active">Belonging to: 
+            <a class="nav-link" href="#">{{ hosts.resourcegroup | upper }}</a>
         </li>
     </ol>
     <div class="row">
@@ -26,9 +26,9 @@
                         
 
                   </div>
-                <div class="card-body" id="scanprogress" data-ajax-target="{% url 'website:scan-progress' scans.id %}">
+                <div class="card-body">
                     <h5 class="card-title">
-                        {{ scans.scanName }}
+                        {{ hosts.main_address }}
                     </h5>
                     <p class="card-text">some text</p>
                     
@@ -45,13 +45,6 @@
             </div>
         </div>
         <div class="col-xl-6 col-md-6">
-            {% if scans.active %}
-                <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-success">On</button>
-                <input type="hidden" id="active" value="1">
-            {% else %}
-                <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-danger">Off</button>
-                <input type="hidden" id="active" value="0">
-            {% endif %}
             <div class="card bg-secondary text-white mb-4">
                 <div class="card-header">
                     
@@ -69,7 +62,7 @@
                   </div>
                 <div class="card-body">Warning Card</div>
                 <h5 class="card-title">
-                    {{ scans.scanName }}
+                    {{ hosts.main_address }}
                 </h5>
                 <p class="card-text">some text</p>
             
@@ -90,7 +83,7 @@
             Scans
         </div>
         <div class="card-body">
-        {% if scans_list %}
+        {% if hosts_list %}
             <table id="datatablesSimple2">
                 <thead>
                     <tr>
@@ -119,7 +112,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>'There are no scans in the database.' </p>
+            <p>'There are no hosts in the database.' </p>
         {% endif %}
         </div>
     </div>
@@ -127,6 +120,5 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'website/js/scanupdate.js' %}"></script>
-<script src="{% static 'website/js/scans.js' %}"></script>
+
 {% endblock %}
