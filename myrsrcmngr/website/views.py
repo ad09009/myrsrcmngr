@@ -27,6 +27,91 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+def dashboard(request):
+    con = {}
+    rreport = None
+    report_changes = {}
+    for rgroup in resourcegroups.objects.all().order_by('-updated_at'):
+        
+        try:
+            rreport = rgroup.reports_set.latest('id')
+            groupname = rgroup.name
+            print(groupname)
+            rchanges = rreport.changes_set.all().exclude(attribute='elapsed')
+            print(rchanges)
+            changes_count = rchanges.count()
+            print(changes_count)
+            if rchanges:
+                print('here')
+                report_changes['hosts_changed'] = 0
+                print('here2')
+                report_changes['hosts_added'] = 0
+                report_changes['hosts_removed'] = 0
+                report_changes['services_changed'] = 0
+                report_changes['services_added'] = 0
+                report_changes['services_removed'] = 0
+                report_changes['hosts_up'] = None
+                report_changes['hosts_down'] = None
+                report_changes['hosts_total'] = None
+                counter = 0
+                print('rchanges')
+                for change in rchanges:
+                    print(change)
+                    print(counter)
+                    counter = counter + 1
+                    if change.attribute == 'hosts_up':
+                        print('hosts_up', change.cur_val, change.prev_val)
+                        if change.prev_val is None:
+                            print('prev_val is None')
+                            change.prev_val = 0
+                        report_changes['hosts_up'] = int(change.cur_val) - int(change.prev_val)
+                        print('after hosts up')
+                    elif change.attribute == 'hosts_down':
+                        print('hosts_down')
+                        if change.prev_val is None:
+                            change.prev_val = 0
+                        report_changes['hosts_down'] = int(change.cur_val) - int(change.prev_val)
+                    elif change.attribute == 'hosts_total':
+                        print('hosts_total')
+                        if change.prev_val is None:
+                            change.prev_val = 0
+                        report_changes['hosts_total'] = int(change.cur_val) - int(change.prev_val)
+                    elif change.status == 'CHANGED' and change.host is not None and change.service is None:
+                        print('hosts_changed')
+                        report_changes['hosts_changed'] = report_changes['hosts_changed'] + 1
+                    elif change.status == 'ADDED' and change.host is not None and change.service is not None:
+                        print('services_added')
+                        report_changes['services_added'] = report_changes['services_added'] + 1
+                    elif change.status == 'CHANGED' and change.host is not None and change.service is not None:
+                        print('services_changed')
+                        report_changes['services_changed'] = report_changes['services_changed'] + 1
+                    elif change.status == 'REMOVED' and change.host is not None and change.service is not None:
+                        print('services_removed')
+                        report_changes['services_removed'] = report_changes['services_removed'] + 1
+                    elif change.status == 'REMOVED' and change.host is not None and change.service is None:
+                        print('hosts_removed')
+                        report_changes['hosts_removed'] = report_changes['hosts_removed'] + 1
+                    elif change.status == 'ADDED' and change.host is not None and change.service is None:
+                        print('hosts_added')
+                        report_changes['hosts_added'] = report_changes['hosts_added'] + 1
+            print('report_changes')
+            con[groupname] = {
+                'report':rreport,
+                'report_changes': report_changes,
+                'changes':rchanges,
+                'changes_count':changes_count,
+            }
+        except:
+            print("no report")
+            rreport = None
+    context = {
+        'con': con
+    }
+    for key, value in context['con'].items():
+        print(key, value)
+    print('something')
+    return render(request, 'index.html', context)
+
 def about(request):
     return render(request, 'about.html', {})
 
