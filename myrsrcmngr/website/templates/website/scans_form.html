@@ -1,25 +1,23 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="row">
-  <div class="col-xl-6">
-    <div class="card mb-4">
-      <div class="card-header">
+<div class="container">
+    <div class="card mx-auto d-flex" style="width: 75%;">
+      <div class="card-header bg-secondary">
           <i class="fas fa-table me-1"></i>
           New scan
       </div>
-      <div class="card-body">
+      <div class="card-body bg-light">
         <div>
           <form action="" method="post">
             {% csrf_token %}
             {{ form|crispy }}
             <div></div>
-            <input type="submit" class="btn btn-warning" value="Save">
-            <input type="submit" class="btn btn-primary" value="Cancel" onclick="window.location.href='{% url 'website:index' %}';return false;">
+            <input type="submit" class="btn btn-info" value="Save">
+            <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{% url 'website:index' %}';return false;">
           </form>
         </div>
       </div>
     </div>
-  </div>
 </div>
 {% endblock %}

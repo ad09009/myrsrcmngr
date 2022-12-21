@@ -2,50 +2,53 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.dateformat import DateFormat
+from django.core.validators import MinValueValidator, MinLengthValidator
 
 class resourcegroups(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now = True, null=True)
-    subnet = models.CharField(max_length=100, blank=True, null=True)
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=600, blank=True, null=True)
+    subnet = models.CharField("Subnet", max_length=100, blank=True, null=True, help_text = 'Only IPv4 addresses are supported. Indicate subnet in CIDR notation (e.g. 198.162.0.1/24)')
+    name = models.CharField("Group Name",max_length=200, validators=[MinLengthValidator(3),])
+    description = models.CharField("Description",max_length=600, blank=True, null=True)
     user = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)
     def __str__(self):
         return self.name
     
 class scans(models.Model):
-    create_date = models.DateTimeField(auto_now_add=True)
+    create_date = models.DateTimeField("Date of Creation",auto_now_add=True)
     scanAuthor = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)
-    updated_at = models.DateTimeField(auto_now = True, null=True)
-    last_executed = models.DateTimeField(blank=True, null=True)
-    next_execution_at = models.DateTimeField(null=True)
-    scanName = models.CharField(max_length=100)
-    status = models.SmallIntegerField(blank=True, null=True)
+    updated_at = models.DateTimeField("Date of Modification",auto_now = True, null=True)
+    last_executed = models.DateTimeField("Last Executed at",blank=True, null=True)
+    next_execution_at = models.DateTimeField("Next Execution at",null=True)
+    scanName = models.CharField("Name",max_length=100, validators=[MinLengthValidator(3),])
+    status = models.SmallIntegerField("Status",blank=True, null=True)
     #0 - self.DONE,
     #1 - self.READY,
     #2 - self.RUNNING,
     #3 - self.CANCELLED,
     #4 - self.FAILED
-    task_name = models.CharField(max_length=50, blank=True, null=True)
-    task_status = models.CharField(max_length=30, blank=True, null=True)
+    task_name = models.CharField("Task Name",max_length=50, blank=True, null=True)
+    task_status = models.CharField("Task Status",max_length=30, blank=True, null=True)
     task_etc = models.IntegerField(blank=True, null=True)
-    task_progress = models.FloatField(blank=True, null=True)
-    params = models.CharField(max_length=200, blank=True, null=True)
-    active = models.BooleanField(blank=True, null=True)
-    resourcegroup = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
+    task_progress = models.FloatField("Task Progress",blank=True, null=True)
+    params = models.CharField("Parameters",max_length=200, blank=True, null=True)
+    active = models.BooleanField("Make Active",default=False, blank=True, null=True)
+    resourcegroup = models.ForeignKey(resourcegroups, verbose_name="Group Name", null=True, on_delete=models.SET_NULL)
     
     #scan_templates
     viens = '-oX -vvv --stats-every 1s --top-ports 100 -T2'
     divi = '--stats-every 1s --top-ports 100 -T3'
     tris = '--stats-every 1s --top-ports 100 -T4'
     SCAN_TEMPLATES = [
-        (viens, 'Pirmais variants'),
-        (divi, 'Otrais variants'),
-        (tris, 'Tresais variants'),
+        (viens, '-oX -vvv --stats-every 1s --top-ports 100 -T2'),
+        (divi, '--stats-every 1s --top-ports 100 -T3'),
+        (tris, '--stats-every 1s --top-ports 100 -T4'),
     ]
     ScanTemplate = models.CharField( 
+        "Scan Template",
         max_length=80,
-        choices=SCAN_TEMPLATES
+        choices=SCAN_TEMPLATES,
+        help_text = 'Indicate here the scan template you want to use. Free parameter entry is not supported yet.'
     )
     
     #scan_schedule
@@ -60,8 +63,10 @@ class scans(models.Model):
         (weekly, 'Every week'),
     ]
     ScanSchedule = models.CharField( 
+        "Scan Schedule",
         max_length=2,
-        choices=SCAN_SCHEDULES
+        choices=SCAN_SCHEDULES,
+        help_text = 'Indicate here how often would you like the scan to run.'
     )
     
     def __str__(self):

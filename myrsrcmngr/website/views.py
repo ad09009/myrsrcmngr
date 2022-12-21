@@ -119,13 +119,13 @@ def about(request):
 
 class ScanCreateView(OwnerCreateView):
     model = scans
-    fields = ['scanName', 'ScanTemplate', 'ScanSchedule']
+    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule', 'active']
     # By convention:
     # template_name = "website/scans_form.html"
 
 class ScanUpdateView(OwnerUpdateView):
     model = scans
-    fields = ['scanName', 'ScanTemplate', 'ScanSchedule']
+    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule', 'active']
     # By convention:
     # template_name = "website/scans_form.html"
 
@@ -136,7 +136,6 @@ class ScanDeleteView(OwnerDeleteView):
     # template_name = "website/scans_confirm_delete.html"
     
 class ScansListView(ListView):
-    paginate_by = 5
     model = scans
     ordering = ['next_execution_at']
     # By convention:
