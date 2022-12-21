@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from .serializers import ScansSerializer
+from .serializers import ScansSerializer, ReportsSerializer
 from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView
 
@@ -150,6 +150,19 @@ def scan_toggle(request, pk):
         scan.active = active
         scan.save()
         return JsonResponse({"active":active})
+
+@api_view(['GET'])
+def scan_refresh(request, pk):
+    if request.method == 'GET':
+        scan = scans.objects.get(pk=pk)
+        if scan:
+            scanreports = scan.reports_set.all()
+            if scanreports:
+                serializer = ReportsSerializer(scanreports, many=True)
+                scanreports = serializer.data
+        else:
+            scanreports = None
+        return JsonResponse({"data":scanreports})
 
 @api_view(['GET'])
 def scans_list(request):

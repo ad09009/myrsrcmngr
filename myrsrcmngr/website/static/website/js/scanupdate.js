@@ -127,6 +127,45 @@ function toggleActive() {
     });
   }
 
+  function reportsTableRefresh() {
+    // Get the current value of the "active" parameter
+    console.log("reportsTableRefresh");
+    // Get the URL of the page to request the table data from
+    var url = $("#datatablesSimple4").attr("report-url");
+    // 
+    var table = $('#datatablesSimple4').DataTable( {
+        ajax: url,
+        columns: [
+            { data: 'started_str', title: 'Started at' },
+            { data: 'endtime_str', title: 'Ended at' },
+            { data: 'elapsed', title: 'Duration' },
+            { data: 'num_services', title: 'Number of Services' },
+            { data: 'hosts_up', title: 'Hosts Up' },
+            { data: 'hosts_down', title: 'Hosts Down' },
+            { data: 'hosts_total', title: 'Hosts Total' },
+            {
+              data: 'id',
+              title: 'URL',
+              render: function(data, type, row, meta) {
+                console.log(row.id, row.started_str, row.endtime_str, row.elapsed, row.num_services, row.hosts_up, row.hosts_down, row.hosts_total)
+                return '<a href=' + '/reports/' + row.id + '>View Report</a>';
+              }
+            },
+        ],
+        pageLength: 10,
+        lenghtChange: true,
+        autoWidth: false,
+        searching: true,
+        bInfo: true,
+        bSort: true,
+        paging: true
+    } );
+    setInterval(function() {
+        table.ajax.reload();
+    }, 3000);
+  }
+
+
 
 
 $(document).ready(function(){
@@ -136,6 +175,8 @@ $(document).ready(function(){
         e.preventDefault();
         toggleActive();
     });
+    reportsTableRefresh();
+    
     $.ajaxSetup({ cache:false });
     updateMsg();
 

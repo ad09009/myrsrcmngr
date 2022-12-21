@@ -15,6 +15,7 @@ urlpatterns = [
     path('scans/<int:pk>/delete', views.ScanDeleteView.as_view(success_url=reverse_lazy('website:index')), name='delete-scan'),
     path('scans/api/<int:pk>/', views.ScanProgressView.as_view(), name='scan-progress'),
     path('scans/api/toggle/<int:pk>/', views.scan_toggle, name='scan-toggle'),
+    path('scans/api/refresh/scans/<int:pk>/', views.scan_refresh, name='reports-refresh'),
     path('groups/', views.ResourcegroupsListView.as_view(), name='groups-list'),
     path('groups/<int:pk>/', views.ResourcegroupDetailView.as_view(), name='groups-detail'),
     path('groups/create', views.ResourcegroupCreateView.as_view(), name='new-group'),
