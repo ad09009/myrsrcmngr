@@ -2,7 +2,8 @@ window.addEventListener('DOMContentLoaded', event => {
     // Simple-DataTables
     // https://github.com/fiduswriter/Simple-DataTables/wiki
     $('#datatablesSimple').DataTable( {
-        paging: true
+        paging: true,
+        order: [[1, 'asc']],
         } );
     $('#datatablesSimple2').DataTable( {
         "ajax": "/scans/json/",

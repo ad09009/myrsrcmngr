@@ -17,7 +17,7 @@ function updateMsg() {
             else{
                 $('#scanprogress').append('<p class="card-text">'+'Scan is: '+' ON'+'</p>');
                 if (scanreturn['status'] != 2){
-                    $('#scanprogress').append('<p>'+'Scan is: '+'DONE'+'</p>');
+                    $('#scanprogress').append('<p>'+'Current execution status: '+'DONE'+'</p>');
                     $('#scanprogress').append('<p> Next scan: '+scanreturn['next_at']+'</p><br>');
                 }
 
@@ -101,12 +101,14 @@ function toggleActive() {
       success: function(response) {
         // Update the color and text of the button to reflect the new value of the "active" parameter
         if (newValue === "1") {
-          $("#toggle-button").css("background-color", "green");
-          $("#toggle-button").text("On");
+          $("#toggle-button").removeClass("btn-success");
+          $("#toggle-button").addClass("btn-danger");
+          $("#toggle-button").text("TURN OFF");
           $("#active").val("1");
         } else {
-          $("#toggle-button").css("background-color", "red");
-          $("#toggle-button").text("Off");
+          $("#toggle-button").removeClass("btn-danger");
+          $("#toggle-button").addClass("btn-success");
+          $("#toggle-button").text("TURN ON");
           $("#active").val("0");
         }
       }

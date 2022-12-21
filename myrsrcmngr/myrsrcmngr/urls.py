@@ -16,13 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from myrsrcmngr import views
-from users.views import register
+from users.views import register, logout_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('resources/', views.Resource_list),
     path('', include('website.urls')),
     path('register/', register.as_view(), name='register'),
+    #path('login/', login_view, name='login-view'),
+    path('logout/', logout_view, name='logout-view'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('profile/', include('users.urls')),
 ]

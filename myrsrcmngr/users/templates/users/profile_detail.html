@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<h1>Profile of {{ object.userfor.username|title }}</h1>
+       <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+            {% if object.userfor == user or user.is_superuser %}
+                <a class="btn btn-warning mr-2" href="{% url 'users:profile-update' object.userfor.profile.id %}"> Edit profile</a>
+                <a class="btn btn-danger mr-2" href="{% url 'users:profile-delete' object.userfor.id %}">Delete profile</a>
+            {% endif %}
+            </div>
+            <p class="article-content">Bio: {{ object.bio|default:"-" }} </p>
+            <p class="article-content">Date of birth: {{ object.birth_date|default_if_none:"-" }}</p>
+
+            
+            <hr>
+            
+
+          </div>
+        </article> 
+
+{% endblock %}

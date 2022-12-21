@@ -17,8 +17,10 @@ urlpatterns = [
     path('scans/api/toggle/<int:pk>/', views.scan_toggle, name='scan-toggle'),
     path('groups/', views.ResourcegroupsListView.as_view(), name='groups-list'),
     path('groups/<int:pk>/', views.ResourcegroupDetailView.as_view(), name='groups-detail'),
-
+    path('groups/create', views.ResourcegroupCreateView.as_view(), name='new-group'),
+    
     path('reports/', views.ReportsListView.as_view(), name='reports-list'),
+    path('reports/<int:pk>', views.ReportDetailView.as_view(), name='report-detail'),
     path('hosts/', views.HostsListView.as_view(), name='hosts-list'),
     
     path('search/', views.GlobalSearch, name='search'),

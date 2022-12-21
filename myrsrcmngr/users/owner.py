@@ -4,7 +4,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, ListView, D
 from django.urls import reverse_lazy
 from django.contrib import messages
 
-from website.models import resourcegroups
+from website.models import resourcegroups, scans
 
 from django.utils.translation import gettext_lazy as _
 
@@ -14,8 +14,10 @@ class OwnerDetailView(LoginRequiredMixin, DetailView):
     """
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        rec = resourcegroups.objects.filter(RecipeAuthor = self.object.userfor)
-        context['rec'] = rec
+        usergroups = resourcegroups.objects.filter(user = self.object.userfor)
+        userscans = scans.objects.filter(scanAuthor = self.object.userfor)
+        context['usergroups'] = usergroups
+        context['userscans'] = userscans
         return context
 
 class OwnerUpdateView(LoginRequiredMixin, UpdateView):

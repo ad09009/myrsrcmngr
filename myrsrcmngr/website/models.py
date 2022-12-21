@@ -70,6 +70,34 @@ class scans(models.Model):
             
         }
     
+    def formatted_status(self):
+        # Return the string value of the status attribute
+        if self.status == 0:
+            return 'DONE'
+        elif self.status == 1:
+            return 'READY'
+        elif self.status == 2:
+            return 'RUNNING'
+        elif self.status == 3:
+            return 'CANCELLED'
+        elif self.status == 4:
+            return 'FAILED'
+        else:
+            return 'UNKNOWN'
+    
+    def formatted_schedule(self):
+        # Return the string value of the status attribute
+        if self.ScanSchedule == 'hh':
+            return 'Every half-hour'
+        elif self.ScanSchedule == 'h':
+            return 'Every hour'
+        elif self.ScanSchedule == 'd':
+            return 'Every day'
+        elif self.ScanSchedule == 'w':
+            return 'Every week'
+        else:
+            return 'UNKNOWN'
+    
 class hosts(models.Model):
     main_address = models.CharField(max_length=50)
     ipv4 = models.CharField(max_length=50, blank=True, null=True)

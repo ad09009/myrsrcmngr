@@ -198,6 +198,13 @@ class ScanProgressView(View):
         
 class ScanDetailView(DetailView):
     model = scans
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the default context data
+        context = super().get_context_data(**kwargs)
+
+        # Add additional querysets or dictionaries to the context
+        context['reports'] = self.object.reports_set.order_by('id')
+        return context
 #CRUD views for Hosts
 
 class HostCreateView(OwnerCreateView):
@@ -243,7 +250,6 @@ class ResourcegroupDeleteView(OwnerDeleteView):
     # template_name = "website/scans_confirm_delete.html"
     
 class ResourcegroupsListView(ListView):
-    paginate_by = 5
     model = resourcegroups
     # By convention:
     # template_name = "website/scans_list.html"
@@ -255,7 +261,6 @@ class ResourcegroupDetailView(DetailView):
 # List and Detail view for Reports
 
 class ReportsListView(ListView):
-    paginate_by = 5
     model = reports
     # By convention:
     # template_name = "website/scans_list.html"

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.views import generic
 from django.urls import reverse_lazy
 
@@ -33,6 +33,13 @@ def login(request):
     if user is not None:
         login(request, user)
         return redirect('website:index')
+
+def logout_view(request):
+    # Log the user out
+    logout(request)
+
+    # Redirect to the login page
+    return redirect('website:index')
 
 class ProfileDetailView(OwnerDetailView):
     model = Profile
