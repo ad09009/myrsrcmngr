@@ -8,6 +8,6 @@
 <form action="" method="POST">
   {% csrf_token %}
   <input type="submit" class = "btn btn-danger" value="{% translate 'Yes, delete' %}">
-  <input type="submit" class = "btn btn-primary" value="{% translate 'Cancel' %}" onclick="window.location.href='{% url 'users:profile-home' user.profile.id %}';return false;">
+  <input type="submit" class = "btn btn-primary" value="{% translate 'Cancel' %}" onclick="window.location.href='{% url 'website:scan-detail' scans.id %}';return false;">
 </form>
 {% endblock %}

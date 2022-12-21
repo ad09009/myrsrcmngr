@@ -130,6 +130,7 @@ class reports(models.Model):
     hosts_a_r = models.ManyToManyField(hosts, blank = True, through = "hosts_added_removed", through_fields=('cur_report','host'))
     is_last = models.BooleanField(default=False)
     parse_success = models.BooleanField(default=True)
+    get_latest_by = "-id"
     
 class changes(models.Model):
     attribute = models.CharField(max_length=100, blank=True, null=True)

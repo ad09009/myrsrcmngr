@@ -23,7 +23,7 @@ class OwnerUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
            pk = self.kwargs["pk"]
-           return reverse_lazy("website:scan_detail", kwargs={"pk": pk})
+           return reverse_lazy("website:scan-detail", kwargs={"pk": pk})
 
     def get_queryset(self):
         qs = super(OwnerUpdateView, self).get_queryset()
