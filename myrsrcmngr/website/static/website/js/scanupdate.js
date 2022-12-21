@@ -4,30 +4,42 @@ function updateMsg() {
     var spinner = $("#scanprogress").attr("altstuff");
     $.getJSON(urlis, function(scanreturn){
         console.log('JSON', scanreturn);
-        $('#scanprogress').empty();
 
+        /*Status updates*/
+        /*if no scan is found by the ajax call*/
         if (scanreturn['scan'] == 0){
-            /*$('#scanprogress').append('<img src='+spinner+' alt="Loading..."/>');*/
-            $('#scanprogress').append('<p>'+'Scan not found'+'</p>');
+            $('#stable-scanprogress').empty();
+            $('#scanprogress').empty();
+            $('#statslist').empty();
+            $('#stable-scanprogress').append('<p>'+'Scan not found'+'</p>');
         }
         else {
-            if (scanreturn['active'] == 'Off'){
-                $('#scanprogress').append('<p>'+'Scan is: '+' OFF'+'</p>');
+            /*Stats updates*/
+            $('#statslist-report-count').text(scanreturn['num_reports']);
+            $('#statslist-exec-time').text(scanreturn['average_duration']+ ' seconds');
+            $('#statslist').show();
+            /* Info update*/
+            $('#last-exec-scanprogress').text(scanreturn['last_executed']);
+            /*Status updates*/
+            $('#active-scanprogress').text(scanreturn['active']);
+            $('#status-scanprogress').text(scanreturn['scan_status']);
+            if (scanreturn['active'] == 'OFF'){
+                $('#next-exec-scanprogress').hide();
+                $('#scanprogress').hide();
             }
             else{
-                $('#scanprogress').append('<p class="card-text">'+'Scan is: '+' ON'+'</p>');
-                if (scanreturn['status'] != 2){
-                    $('#scanprogress').append('<p>'+'Current execution status: '+'DONE'+'</p>');
-                    $('#scanprogress').append('<p> Next scan: '+scanreturn['next_at']+'</p><br>');
+                $('#next-val-scanprogress').text(scanreturn['next_at']);
+                $('#next-exec-scanprogress').show();
+                
+                if (scanreturn['scan_status'] == "RUNNING"){
+                    $('#task-name-scanprogress').text(scanreturn['namet']);
+                    $('#task-status-scanprogress').text(scanreturn['status']);
+                    $('#task-progress-scanprogress').css('width', scanreturn['progress'] + '%').text(scanreturn['progress'] + '%');
+                    $('#scanprogress').show();
                 }
-
-                
-                    $('#scanprogress').append('<p> Task status: '+scanreturn['status']+'</p>');
-                    $('#scanprogress').append('<p> Task name: '+scanreturn['name']+'</p>');
-                    $('#scanprogress').append('<p> Task etc: '+scanreturn['etc']+'</p>');
-                    $('#scanprogress').append('<p> Task progress: '+scanreturn['progress']+'% </p>');
-                
-
+                else {
+                    $('#scanprogress').hide();
+                }
             }
         }
         setTimeout('updateMsg()', 3000);
@@ -118,6 +130,8 @@ function toggleActive() {
 
 
 $(document).ready(function(){
+    $('#scanprogress').hide();
+    $('#statslist').hide();
     $("#toggle-button").click(function(e){
         e.preventDefault();
         toggleActive();

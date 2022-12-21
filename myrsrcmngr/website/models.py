@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.utils.dateformat import DateFormat
 
 class resourcegroups(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
@@ -97,6 +99,24 @@ class scans(models.Model):
             return 'Every week'
         else:
             return 'UNKNOWN'
+    
+    def formatted_active(self):
+        if self.active:
+            return "ON"
+        else:
+            return "OFF"
+    
+    def formatted_next_execution_at(self):
+        if self.next_execution_at:
+            return naturaltime(self.next_execution_at)
+        else:
+            return "None"
+    
+    def formatted_last_executed(self):
+        if self.last_executed:
+            return DateFormat(self.last_executed).format("jS F Y")
+        else:
+            return "Never"
     
 class hosts(models.Model):
     main_address = models.CharField(max_length=50)

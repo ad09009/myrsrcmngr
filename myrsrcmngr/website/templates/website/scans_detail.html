@@ -3,13 +3,6 @@
 {% block content %}
 <div class="container-fluid px-4">
     <h2 class="d-inline-block my-auto mt-4">Scan: {{ scans.scanName | upper }}</h2>
-    {% if scans.active %}
-        <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-danger d-inline-block my-auto">TURN OFF</button>
-        <input type="hidden" id="active" value="1">
-    {% else %}
-        <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-success d-inline-block my-auto">TURN ON</button>
-        <input type="hidden" id="active" value="0">
-    {% endif %}
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item active">Group: 
             <a href="{% url 'website:groups-detail' scans.resourcegroup.id %}">{{ scans.resourcegroup | upper }}</a>
@@ -22,12 +15,6 @@
                     <ul class="nav nav-tabs float-xs-left" id="myTab" role="tablist">
                         <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">Info</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status-tab-pane" type="button" role="tab" aria-controls="status-tab-pane" aria-selected="false">Status</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats-tab-pane" type="button" role="tab" aria-controls="stats-tab-pane" aria-selected="false">Stats</button>
                         </li>
                         {% if scans.scanAuthor == user or user.is_superuser %}
                         <li class="nav-item" role="presentation">
@@ -43,22 +30,10 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
                             <div class="card-body">
-                                <h5 class="card-title">{{ scans.scanName | title }}</h5>
-                                <p class="card-text">Created by <a href="{% url 'users:profile-home' scans.scanAuthor.id %}">{{ scans.scanAuthor }}</a> on {{ scans.create_date | date }}</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">Group:</div>
-                                    <div class="col-6 text-right"><a href="{% url 'website:groups-detail' scans.resourcegroup.id %}">{{ scans.resourcegroup | upper }}</a></div>
-                                </div>
                                 <div class="row">
                                     <div class="col-6">Last Executed:</div>
-                                    <div class="col-6 text-right">{{ scans.last_executed }}</div>
+                                    <div class="col-6 text-right" id="last-exec-scanprogress">{{ scans.last_executed }}</div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-6">Next Execution at:</div>
-                                    <div class="col-6 text-right">{{ scans.next_execution_at }}</div>
-                                </div>  
                                 <div class="row">
                                     <div class="col-6">Parameters:</div>
                                     <div class="col-6 text-right">{{ scans.ScanTemplate }}</div>
@@ -68,24 +43,20 @@
                                     <div class="col-6 text-right">{{ scans.formatted_schedule }}</div>
                                 </div>                           
                             </div>
+                            <div class="card-body">
+                                <p class="card-text">Created by <a href="{% url 'users:profile-home' scans.scanAuthor.profile.id %}">{{ scans.scanAuthor }}</a> on {{ scans.create_date | date }}</p>
+                            </div>
                         </div>
-                        <div class="tab-pane fade" id="status-tab-pane" role="tabpanel" aria-labelledby="status-tab" tabindex="0">
-                            <div class="card-body" id="scanprogress" data-ajax-target="{% url 'website:scan-progress' scans.id %}">
-                                <h5 class="card-title">
-                                    {{ scans.scanName }}
-                                </h5>
-                                <p class="card-text">some text</p>
-                                
-                                <div class="progress">
-                                    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
-                                </div>
-                            </div>            
-                        </div>
-                        <div class="tab-pane fade" id="stats-tab-pane" role="tabpanel" aria-labelledby="stats-tab" tabindex="0">...</div>
                         <div class="tab-pane fade" id="options-tab-pane" role="tabpanel" aria-labelledby="options-tab" tabindex="0">
                             <div class="card-body">
-                                <h5 class="card-title">{{ scans.scanName }} created by <a href="{% url 'users:profile-home' scans.scanAuthor.id %}">{{ scans.scanAuthor }}</a></h5>
                                 {% if scans.scanAuthor == user or user.is_superuser %}
+                                    {% if scans.active %}
+                                        <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-danger d-inline-block my-auto">TURN OFF</button>
+                                        <input type="hidden" id="active" value="1">
+                                    {% else %}
+                                        <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-success d-inline-block my-auto">TURN ON</button>
+                                        <input type="hidden" id="active" value="0">
+                                    {% endif %}
                                     <a href="{% url 'website:edit-scan' scans.id %}" class="btn btn-primary">Edit</a>
                                     <a href="{% url 'website:delete-scan' scans.id %}" class="btn btn-primary">Delete</a>
                                 {% endif %}
@@ -102,32 +73,68 @@
         <div class="col-xl-6 col-md-6">
             <div class="card bg-secondary text-white mb-4">
                 <div class="card-header">
-                    
-                    <ul class="nav nav-pills card-header-pills float-xs-left">
-                      <li class="nav-item">
-                        <a class="nav-link active" href="#">Active</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Disabled</a>
-                      </li>
+                    <ul class="nav nav-tabs float-xs-left" id="myTab2" role="tablist">
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="status-tab" data-bs-toggle="tab" data-bs-target="#status-tab-pane" type="button" role="tab" aria-controls="status-tab-pane" aria-selected="true">Status</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats-tab-pane" type="button" role="tab" aria-controls="stats-tab-pane" aria-selected="false">Stats</button>
+                        </li>
                     </ul>
-                  </div>
-                <div class="card-body">Warning Card</div>
-                <h5 class="card-title">
-                    {{ scans.scanName }}
-                </h5>
-                <p class="card-text">some text</p>
-            
-                <div class="progress">
-                    <div class="progress-bar w-25" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
                 </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+                    <div class="tab-content" id="myTabContent2">
+                        <div class="tab-pane fade show active" id="status-tab-pane" role="tabpanel" aria-labelledby="status-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body" id="stable-scanprogress">
+                                    <div class="row">
+                                        <div class="col-6">Scan is: </div>
+                                        <div class="col-6 text-right" id="active-scanprogress">{{ scans.formatted_active }}</div>
+                                    </div> 
+                                    <div class="row">
+                                        <div class="col-6">Execution:</div>
+                                        <div class="col-6 text-right" id="status-scanprogress">{{ scans.formatted_status }}</div>
+                                    </div>
+                                    {% if scans.formatted_active == "ON" %}
+                                    <div class="row" id="next-exec-scanprogress">
+                                        <div class="col-6">Next Execution:</div>
+                                        <div class="col-6 text-right" id="next-val-scanprogress">{{ scans.formatted_next_execution_at }}</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body" id="scanprogress" data-ajax-target="{% url 'website:scan-progress' scans.id %}">
+                                    <div class="row">
+                                        <div class="col-6">Task Name:</div>
+                                        <div class="col-6 text-right" id="task-name-scanprogress">{{ scans.task_name }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Task Status: </div>
+                                        <div class="col-6 text-right" id="task-status-scanprogress">{{ scans.task_status }}</div>
+                                    </div> 
+                                    <div class="progress">
+                                        <div class="progress-bar" id="task-progress-scanprogress" role="progressbar" style="width: 0%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                    </div>                 
+                                </div>
+                            </div>            
+                        </div>
+                        <div class="tab-pane fade" id="stats-tab-pane" role="tabpanel" aria-labelledby="stats-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body" id="statslist">
+                                    <div class="row">
+                                        <div class="col-6">Reports Generated: </div>
+                                        <div class="col-6 text-right" id="statslist-report-count">0</div>
+                                    </div> 
+                                    <div class="row">
+                                        <div class="col-6">Average Execution Time:</div>
+                                        <div class="col-6 text-right" id="statslist-exec-time">0</div>
+                                    </div>
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white" href="#">View All Info</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
             </div>
         </div>
 
