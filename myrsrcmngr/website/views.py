@@ -6,7 +6,8 @@ from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer
 from rest_framework.decorators import api_view
-from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView
+from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView
+from .forms import GroupsForm
 
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups
@@ -204,6 +205,7 @@ def scanlist_totals_refresh(request):
             totals['scans_running_total'] = running_total
         return JsonResponse({"data":totals})
 
+@api_view(['GET'])
 def grouplist_totals_refresh(request):
     if request.method == 'GET':
         totals = {
@@ -221,6 +223,26 @@ def grouplist_totals_refresh(request):
             hosts_total = hosts_total + group.hosts_set.count()
         totals['groups_scans_total'] = scans_total
         totals['groups_hosts_total'] = hosts_total
+        return JsonResponse({"data":totals})
+
+@api_view(['GET'])
+def group_changes_refresh(request):
+    if request.method == 'GET':
+        totals = {
+            'groups_created_total': 0,
+            'groups_scans_total': 0,
+            'groups_hosts_total': 0,
+        }
+        return JsonResponse({"data":totals})
+    
+@api_view(['GET'])
+def hostsgroup_refresh(request):
+    if request.method == 'GET':
+        totals = {
+            'groups_created_total': 0,
+            'groups_scans_total': 0,
+            'groups_hosts_total': 0,
+        }
         return JsonResponse({"data":totals})
     
 @api_view(['GET'])
@@ -318,8 +340,9 @@ class HostDetailView(DetailView):
 
 #CRUD views for Groups
 
-class ResourcegroupCreateView(OwnerCreateView):
+class ResourcegroupCreateView(GroupOwnerCreateView):
     model = resourcegroups
+    form_class = GroupsForm
     # By convention:
     # template_name = "website/hosts_form.html"
 

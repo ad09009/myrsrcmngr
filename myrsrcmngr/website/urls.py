@@ -21,13 +21,16 @@ urlpatterns = [
     path('groups/', views.ResourcegroupsListView.as_view(), name='groups-list'),
     path('groups/<int:pk>/', views.ResourcegroupDetailView.as_view(), name='groups-detail'),
     path('groups/create', views.ResourcegroupCreateView.as_view(), name='new-group'),
-    
+    path('groups/<int:pk>/edit', views.ResourcegroupUpdateView.as_view(), name='edit-group'),
+    path('groups/<int:pk>/delete', views.ResourcegroupDeleteView.as_view(success_url=reverse_lazy('website:index')), name='delete-group'),
+
     path('scans/api/refresh/totals/', views.scanlist_totals_refresh, name='scans-totals'),
     path('groups/api/refresh/totals/', views.grouplist_totals_refresh, name='groups-totals'),
+    path('groups/api/refresh/changes/<int:pk>/', views.group_changes_refresh, name='groups-changes'),
     path('reports/', views.ReportsListView.as_view(), name='reports-list'),
     path('reports/<int:pk>', views.ReportDetailView.as_view(), name='report-detail'),
     path('hosts/', views.HostsListView.as_view(), name='hosts-list'),
-    
-    path('search/', views.GlobalSearch, name='search'),
     path('hosts/<int:pk>/', views.HostDetailView.as_view(), name='hosts-detail'),
+    path('groups/api/refresh/hosts/', views.hostsgroup_refresh, name='hosts-refresh'),
+    path('search/', views.GlobalSearch, name='search'),
 ]

@@ -2,76 +2,128 @@
 {% load static %}
 {% block content %}
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Group: {{ resourcegroups.name | upper }}</h1>
+    <h2 class="d-inline-block my-auto mt-4">Group: {{ resourcegroups.name | upper }}</h2>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Created by: <a href="#">{{ resourcegroups.user | upper }}</a>
+        <li class="breadcrumb-item active">Created by: 
+            <a href="{% url 'users:profile-home' resourcegroups.user.profile.id %}">{{ resourcegroups.user | upper }}</a>
         </li>
     </ol>
     <div class="row">
         <div class="col-xl-6 col-md-6">
             <div class="card bg-info text-white mb-4">
                 <div class="card-header">
-                    <ul class="nav nav-pills card-header-pills float-xs-left">
-                      <li class="nav-item">
-                        <a class="nav-link active" href="#">Active</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                      </li>
-                      <li class="nav-item">
-                        
+                    <ul class="nav nav-tabs float-xs-left" id="myGroupTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="group-info-tab" data-bs-toggle="tab" data-bs-target="#group-info-tab-pane" type="button" role="tab" aria-controls="group-info-tab-pane" aria-selected="true">Info</button>
                         </li>
+                        {% if resourcegroups.user == user or user.is_superuser %}
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="group-options-tab" data-bs-toggle="tab" data-bs-target="#group-options-tab-pane" type="button" role="tab" aria-controls="group-options-tab-pane" aria-selected="false">Options</button>
+                        </li>
+                        {% else %}
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="group-options-tab" data-bs-toggle="tab" data-bs-target="#group-options-tab-pane" type="button" role="tab" aria-controls="group-options-tab-pane" aria-selected="false" disabled>Options</button>
+                        </li>
+                        {% endif %}
                     </ul>
-                        
-
-                  </div>
-                <div class="card-body">
-                    <h5 class="card-title">
-                        {{ resourcegroups.name }}
-                    </h5>
-                    <p class="card-text">some text</p>
-                    
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                </div>
+                    <div class="tab-content" id="myGroupTabContent">
+                        <div class="tab-pane fade show active" id="group-info-tab-pane" role="tabpanel" aria-labelledby="group-info-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body">
+                                    <p class="card-text">{{ resourcegroups.description }}</p>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">Total Hosts:</div>
+                                    <div class="col-6 text-right" id="total-hosts-groups">{{ resourcegroups.hosts_count }}</div>
+                                </div>
+                                <div class="row">
+                                    {% if resourcegroups.subnet %}
+                                    <div class="col-6">Subnet:</div>
+                                    <div class="col-6 text-right">{{ resourcegroups.subnet }}</div>
+                                    {% else %}
+                                    <div class="col-6">Subnet:</div>
+                                    <div class="col-6 text-right">Not Indicated</div>
+                                    {% endif %}
+                                </div>  
+                                
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Created by <a href="{% url 'users:profile-home' resourcegroups.user.profile.id %}">{{ resourcegroups.user | upper }}</a> on {{ resourcegroups.add_date | date }}</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="group-options-tab-pane" role="tabpanel" aria-labelledby="group-options-tab" tabindex="0">
+                            <div class="card-body">
+                                {% if resourcegroups.user == user or user.is_superuser %}
+                                    <a href="{% url 'website:edit-group' resourcegroups.id %}" class="btn btn-primary">Edit</a>
+                                    <a href="{% url 'website:delete-group' resourcegroups.id %}" class="btn btn-primary">Delete</a>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    
-                    <a class="small text-white stretched-link" href="#">View Previous Reports</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white" href="#">View All Info</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
             </div>
         </div>
         <div class="col-xl-6 col-md-6">
             <div class="card bg-secondary text-white mb-4">
                 <div class="card-header">
-                    
-                    <ul class="nav nav-pills card-header-pills float-xs-left">
-                      <li class="nav-item">
-                        <a class="nav-link active" href="#">Active</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Disabled</a>
-                      </li>
+                    <ul class="nav nav-tabs float-xs-left" id="myGroupTab2" role="tablist">
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="group-status-tab" data-bs-toggle="tab" data-bs-target="#group-status-tab-pane" type="button" role="tab" aria-controls="group-status-tab-pane" aria-selected="true">Status</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="group-stats-tab" data-bs-toggle="tab" data-bs-target="#group-stats-tab-pane" type="button" role="tab" aria-controls="group-stats-tab-pane" aria-selected="false">Stats</button>
+                        </li>
                     </ul>
-                  </div>
-                <div class="card-body">Warning Card</div>
-                <h5 class="card-title">
-                    {{ resourcegroups.name }}
-                </h5>
-                <p class="card-text">some text</p>
-            
-                <div class="progress">
-                    <div class="progress-bar w-25" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
                 </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+                    <div class="tab-content" id="myGroupTabContent2">
+                        <div class="tab-pane fade show active" id="group-status-tab-pane" role="tabpanel" aria-labelledby="group-status-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body" id="stable-groupstatus">
+                                    <div class="row">
+                                        <div class="col-6">Hosts Up: </div>
+                                        <div class="col-6 text-right" id="hostsup-groupstatus">0</div>
+                                    </div> 
+                                    <div class="row">
+                                        <div class="col-6">Hosts Down:</div>
+                                        <div class="col-6 text-right" id="hostsdown-groupstatus">0</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Hosts Total:</div>
+                                        <div class="col-6 text-right" id="hoststotal-groupstatus">0</div>
+                                    </div>
+                                </div>
+                            </div>            
+                        </div>
+                        <div class="tab-pane fade" id="group-stats-tab-pane" role="tabpanel" aria-labelledby="group-stats-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body" id="groupchanges" data-ajax-target="{% url 'website:groups-changes' resourcegroups.id %}">
+                                    <div class="row">
+                                        <div class="col-6">Added:</div>
+                                        <div class="col-6 text-right" id="addedGroupChange">0</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Removed:</div>
+                                        <div class="col-6 text-right" id="removedGroupChange">0</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Total:</div>
+                                        <div class="col-6 text-right" id="changedGroupChange">0</div>
+                                    </div> 
+                                    <div class="progress">
+                                        <div class="progress-bar" id="progressGroupChange" role="progressbar" style="width: 0%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                    </div>                 
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white" href="#">View All Info</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
             </div>
         </div>
 
@@ -79,39 +131,51 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
-            Scans
+            Hosts for group <b>{{ resourcegroups.name | title }}</b>
         </div>
         <div class="card-body">
-        {% if resourcegroups_list %}
-            <table id="datatablesSimple2">
+        {% if hosts_for_group %}
+            <table id="datatablesSimple4" class="table" report-url="{% url 'website:hosts-refresh' resourcegroups.id %}">
                 <thead>
                     <tr>
-                        <th>Last execution at</th>
-                        <th>Next execution at</th>
-                        <th>Name</th>
-                        <th>Current status</th>
-                        <th>Active</th>
-                        <th>Group</th>
+                        <th>Main Address</th>
+                        <th>Hostnames</th>
+                        <th>Status</th>
+                        <th>MAC Address</th>
+                        <th>OS Fingerprint</th>
+                        <th>Number of Services</th>
+                        <th>URL</th>
                     </tr>
                 </thead>
                 <tfoot>
                     <tr>
-                        <th>Last execution at</th>
-                        <th>Next execution at</th>
-                        <th>Name</th>
-                        <th>Current status</th>
-                        <th>Active</th>
-                        <th>Group</th>
+                        <th>Main Address</th>
+                        <th>Hostnames</th>
+                        <th>Status</th>
+                        <th>MAC Address</th>
+                        <th>OS Fingerprint</th>
+                        <th>Number of Services</th>
+                        <th>URL</th>
                     </tr>
                 </tfoot>
                 <tbody>
-                
+                    {% for host in hosts_for_group %}
+                    <tr>
+                        <td>{{ host.main_address }}</td>
+                        <td>{{ host.hostnames }}</td>
+                        <td>{{ host.status }}</td>
+                        <td>{{ host.mac }}</td>
+                        <td>{{ host.os_fingerprint }}</td>
+                        <td>{{ host.num_of_services }}</td>
+                        <td><a href="{% url 'website:hosts-detail' host.id %}">View</a></td>
+                    </tr>
+                    {% endfor %}
                 <!--JSON response-->
 
                 </tbody>
             </table>
         {% else %}
-            <p>'There are no groups in the database.' </p>
+            <p>'There are no hosts registered for group "{{ resourcegroups.name | title }}" in the database.' </p>
         {% endif %}
         </div>
     </div>
@@ -119,5 +183,5 @@
 {% endblock %}
 
 {% block js %}
-
+<script src="{% static 'website/js/groupupdate.js' %}"></script>
 {% endblock %}

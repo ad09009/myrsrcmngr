@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <div class="card mx-auto d-flex" style="width: 75%;">
+      <div class="card-header bg-secondary">
+          <i class="fas fa-table me-1"></i>
+          New Resource Group
+      </div>
+      <div class="card-body bg-light">
+        <div>
+          <form action="" method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div></div>
+            <input type="submit" class="btn btn-info" value="Save">
+            <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{% url 'website:groups-list' %}';return false;">
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}

@@ -18,6 +18,19 @@ class OwnerCreateView(LoginRequiredMixin, CreateView):
            pk = self.object.id
            return reverse_lazy("website:index")
 
+class GroupOwnerCreateView(LoginRequiredMixin, CreateView):
+
+    # Saves the form instance, sets the current object for the view, and redirects to get_success_url().
+    def form_valid(self, form):
+        object = form.save(commit=False) # don`t commit yet, have to pass the user as owner first
+        object.user = self.request.user
+        it = object.save()
+        return super(GroupOwnerCreateView, self).form_valid(form)
+    
+    def get_success_url(self):
+           pk = self.object.id
+           return reverse_lazy("website:groups-list")
+
 
 class OwnerUpdateView(LoginRequiredMixin, UpdateView):
 
