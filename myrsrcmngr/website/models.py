@@ -14,6 +14,18 @@ class resourcegroups(models.Model):
     def __str__(self):
         return self.name
     
+    def formatted_add_date(self):
+        if self.add_date:
+            return DateFormat(self.add_date).format("Y-m-d H:i:s")
+        else:
+            return None
+        
+    def formatted_updated_at(self):
+        if self.updated_at:
+            return DateFormat(self.updated_at).format("Y-m-d H:i:s")
+        else:
+            return None
+    
 class scans(models.Model):
     create_date = models.DateTimeField("Date of Creation",auto_now_add=True)
     scanAuthor = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)

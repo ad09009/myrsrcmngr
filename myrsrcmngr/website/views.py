@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from .serializers import ScansSerializer, ReportsSerializer
+from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer
 from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView
 
@@ -164,6 +164,66 @@ def scan_refresh(request, pk):
         return JsonResponse({"data":scanreports})
 
 @api_view(['GET'])
+def scanlist_refresh(request):
+    if request.method == 'GET':
+        allscans = scans.objects.all()
+        if allscans:
+            serializer = ScansSerializer(allscans, many=True)
+            allscans = serializer.data
+        else:
+            allscans = None
+        return JsonResponse({"data":allscans})
+
+@api_view(['GET'])
+def grouplist_refresh(request):
+    if request.method == 'GET':
+        allgroups = resourcegroups.objects.all()
+        if allgroups:
+            serializer = ResourcegroupsSerializer(allgroups, many=True)
+            allgroups = serializer.data
+        else:
+            allgroups = None
+        return JsonResponse({"data":allgroups})
+
+@api_view(['GET'])
+def scanlist_totals_refresh(request):
+    if request.method == 'GET':
+        totals = {
+            'scans_created_total': 0,
+            'scans_active_total': 0,
+            'scans_running_total': 0,
+        }
+        created_total = scans.objects.count()
+        if created_total > 0:
+            totals['scans_created_total'] = created_total
+        active_total = scans.objects.filter(active=True).count()
+        if active_total > 0:
+            totals['scans_active_total'] = active_total
+        running_total = scans.objects.filter(active=True, status=2).count()
+        if running_total > 0:
+            totals['scans_running_total'] = running_total
+        return JsonResponse({"data":totals})
+
+def grouplist_totals_refresh(request):
+    if request.method == 'GET':
+        totals = {
+            'groups_created_total': 0,
+            'groups_scans_total': 0,
+            'groups_hosts_total': 0,
+        }
+        created_total = resourcegroups.objects.count()
+        if created_total > 0:
+            totals['groups_created_total'] = created_total
+        scans_total = 0
+        hosts_total = 0
+        for group in resourcegroups.objects.all():
+            scans_total = scans_total + group.scans_set.count()
+            hosts_total = hosts_total + group.hosts_set.count()
+        totals['groups_scans_total'] = scans_total
+        totals['groups_hosts_total'] = hosts_total
+        return JsonResponse({"data":totals})
+    
+@api_view(['GET'])
 def scans_list(request):
     if request.method == 'GET':
         allscans = scans.objects.all()
@@ -248,7 +308,6 @@ class HostDeleteView(OwnerDeleteView):
     # template_name = "website/scans_confirm_delete.html"
     
 class HostsListView(ListView):
-    paginate_by = 5
     model = hosts
     # By convention:
     # template_name = "website/scans_list.html"

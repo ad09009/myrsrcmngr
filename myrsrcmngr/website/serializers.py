@@ -1,11 +1,56 @@
 from rest_framework import serializers
-from .models import scans, reports
+from .models import scans, reports, resourcegroups
 
 class ScansSerializer(serializers.ModelSerializer):
+    resourcegroup_id = serializers.SerializerMethodField()
+    Flast_executed = serializers.SerializerMethodField()
+    Fstatus = serializers.SerializerMethodField()
+    Fnext_execution_at = serializers.SerializerMethodField()
+    Factive = serializers.SerializerMethodField()
+    Fresourcegroup = serializers.SerializerMethodField()
     class Meta:
         model = scans
-        fields = ['last_executed', 'next_execution_at', 'scanName', 'status', 'active', 'resourcegroup']
-        
+        fields = ['id', 'Flast_executed', 'Fnext_execution_at', 'scanName', 'Fstatus', 'Factive', 'Fresourcegroup', 'resourcegroup_id']
+    
+    def get_resourcegroup_id(self, obj):
+        return obj.resourcegroup.id
+    
+    def get_Fresourcegroup(self, obj):
+        return obj.resourcegroup.name
+    
+    def get_Flast_executed(self, obj):
+        return obj.formatted_last_executed()
+    
+    def get_Fnext_execution_at(self, obj):
+        return obj.formatted_next_execution_at()
+    
+    def get_Fstatus(self, obj):
+        return obj.formatted_status()
+    
+    def get_Factive(self, obj):
+        return obj.formatted_active()
+    
+class ResourcegroupsSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    Fuser = serializers.SerializerMethodField()
+    Fadd_date = serializers.SerializerMethodField()
+    Fupdated_at = serializers.SerializerMethodField()
+    class Meta:
+        model = resourcegroups
+        fields = ['id', 'Fadd_date', 'Fupdated_at', 'subnet', 'name', 'description', 'username', 'Fuser']
+    
+    def get_username(self, obj):
+        return obj.user.username
+    
+    def get_Fuser(self, obj):
+        return obj.user.profile.id
+    
+    def get_Fadd_date(self, obj):
+        return obj.formatted_add_date()
+    
+    def get_Fupdated_at(self, obj):
+        return obj.formatted_updated_at()
+    
 class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = reports
