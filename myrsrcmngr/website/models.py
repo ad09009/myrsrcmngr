@@ -190,6 +190,8 @@ class hosts(models.Model):
     reports_belonging_to = models.ManyToManyField("reports", blank = True)
     is_removed = models.BooleanField(blank=True, null=True)
     is_added = models.BooleanField(blank=True, null=True)
+    name = models.CharField(max_length=50, blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
     
 class services(models.Model):
     port = models.IntegerField()

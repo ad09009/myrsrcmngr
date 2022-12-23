@@ -42,6 +42,15 @@
                                     <div class="col-6">Subnet:</div>
                                     <div class="col-6 text-right">Not Indicated</div>
                                     {% endif %}
+                                </div>
+                                <div class="row">
+                                    {% if resourcegroups.ip_addresses %}
+                                    <div class="col-6">IP Addresses:</div>
+                                    <div class="col-6 text-right">{{ resourcegroups.ip_addresses }}</div>
+                                    {% else %}
+                                    <div class="col-6">IP Addresses:</div>
+                                    <div class="col-6 text-right">Not Indicated</div>
+                                    {% endif %}
                                 </div>  
                                 
                             </div>
