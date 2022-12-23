@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer
 from rest_framework.decorators import api_view
-from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView
+from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView
 from .forms import GroupsForm
 
 # Create your views here.
@@ -132,7 +132,7 @@ class ScanUpdateView(OwnerUpdateView):
 
 class ScanDeleteView(OwnerDeleteView):
     model = scans
-    fields = ['scanName', 'ScanTemplate', 'ScanSchedule']
+    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule', 'active']
     # By convention:
     # template_name = "website/scans_confirm_delete.html"
     
@@ -187,6 +187,20 @@ def grouplist_refresh(request):
         return JsonResponse({"data":allgroups})
 
 @api_view(['GET'])
+def scans_group_refresh(request, pk):
+    if request.method == 'GET':
+        group = resourcegroups.objects.get(pk=pk)
+        if group:
+            scans = group.scans_set.all()
+            if scans:
+                serializer = ScansSerializer(scans, many=True)
+                scans = serializer.data
+        else:
+            scans = None
+        return JsonResponse({"data":scans})
+
+
+@api_view(['GET'])
 def scanlist_totals_refresh(request):
     if request.method == 'GET':
         totals = {
@@ -226,13 +240,24 @@ def grouplist_totals_refresh(request):
         return JsonResponse({"data":totals})
 
 @api_view(['GET'])
-def group_changes_refresh(request):
+def group_changes_refresh(request, pk):
     if request.method == 'GET':
         totals = {
-            'groups_created_total': 0,
-            'groups_scans_total': 0,
-            'groups_hosts_total': 0,
+                'scans_count': 0,
+                'hosts_count': 0,
+                'active_scans_count': 0,
+                'running_scans_count': 0,
+                'hostsup_count': 0,
+                'hostsdown_count': 0,
         }
+        group = resourcegroups.objects.get(pk=pk)
+        if group:
+            totals['scans_count'] = group.scans_count()
+            totals['hosts_count'] = group.hosts_count()
+            totals['active_scans_count'] = group.active_scans_count()
+            totals['running_scans_count'] = group.running_scans_count()
+            totals['hostsup_count'] = group.hostsup_count()
+            totals['hostsdown_count'] = group.hostsdown_count()
         return JsonResponse({"data":totals})
     
 @api_view(['GET'])
@@ -346,15 +371,17 @@ class ResourcegroupCreateView(GroupOwnerCreateView):
     # By convention:
     # template_name = "website/hosts_form.html"
 
-class ResourcegroupUpdateView(OwnerUpdateView):
+class ResourcegroupUpdateView(GroupOwnerUpdateView):
     model = resourcegroups
+    form_class = GroupsForm
     # By convention:
     # template_name = "website/scans_form.html"
 
-class ResourcegroupDeleteView(OwnerDeleteView):
+class ResourcegroupDeleteView(GroupOwnerDeleteView):
     model = resourcegroups
+    form_class = GroupsForm
     # By convention:
-    # template_name = "website/scans_confirm_delete.html"
+    # template_name = "website/resourcegroups_confirm_delete.html"
     
 class ResourcegroupsListView(ListView):
     model = resourcegroups

@@ -103,7 +103,7 @@ $(document).ready(function(){
 
     scansTableRefresh();
     scansTotals();
-    setInterval(scansTotals(), 7000);
+    setInterval(scansTotals, 7000);
 
     $.ajaxSetup({ cache:false });
     updateMsg();

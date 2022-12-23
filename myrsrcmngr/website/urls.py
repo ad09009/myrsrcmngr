@@ -18,6 +18,7 @@ urlpatterns = [
     path('scans/api/refresh/scans/<int:pk>/', views.scan_refresh, name='reports-refresh'),
     path('scans/api/refresh/scans/', views.scanlist_refresh, name='scans-refresh'),
     path('groups/api/refresh/groups/', views.grouplist_refresh, name='groups-refresh'),
+    path('groups/api/refresh/scans/<int:pk>/', views.scans_group_refresh, name='scans-group-refresh'),
     path('groups/', views.ResourcegroupsListView.as_view(), name='groups-list'),
     path('groups/<int:pk>/', views.ResourcegroupDetailView.as_view(), name='groups-detail'),
     path('groups/create', views.ResourcegroupCreateView.as_view(), name='new-group'),
@@ -31,6 +32,6 @@ urlpatterns = [
     path('reports/<int:pk>', views.ReportDetailView.as_view(), name='report-detail'),
     path('hosts/', views.HostsListView.as_view(), name='hosts-list'),
     path('hosts/<int:pk>/', views.HostDetailView.as_view(), name='hosts-detail'),
-    path('groups/api/refresh/hosts/', views.hostsgroup_refresh, name='hosts-refresh'),
+    path('groups/api/refresh/hosts/<int:pk>/', views.hostsgroup_refresh, name='hosts-refresh'),
     path('search/', views.GlobalSearch, name='search'),
 ]

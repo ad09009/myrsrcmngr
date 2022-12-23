@@ -32,10 +32,7 @@
                             <div class="card-body">
                                 <div class="card-body">
                                     <p class="card-text">{{ resourcegroups.description }}</p>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">Total Hosts:</div>
-                                    <div class="col-6 text-right" id="total-hosts-groups">{{ resourcegroups.hosts_count }}</div>
+                                    <hr>
                                 </div>
                                 <div class="row">
                                     {% if resourcegroups.subnet %}
@@ -49,7 +46,7 @@
                                 
                             </div>
                             <div class="card-body">
-                                <p class="card-text">Created by <a href="{% url 'users:profile-home' resourcegroups.user.profile.id %}">{{ resourcegroups.user | upper }}</a> on {{ resourcegroups.add_date | date }}</p>
+                                <p class="card-text">Created on {{ resourcegroups.add_date | date }}</p>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="group-options-tab-pane" role="tabpanel" aria-labelledby="group-options-tab" tabindex="0">
@@ -82,18 +79,33 @@
                     <div class="tab-content" id="myGroupTabContent2">
                         <div class="tab-pane fade show active" id="group-status-tab-pane" role="tabpanel" aria-labelledby="group-status-tab" tabindex="0">
                             <div class="card-body">
-                                <div class="card-body" id="stable-groupstatus">
+                                <div class="card-body" id="stable-groupstatus-scans">
+                                    <div class="row">
+                                        <div class="col-6">Total Scans: </div>
+                                        <div class="col-6 text-right" id="totalscans-groupstatus">{{ resourcegroups.scans_count }}</div>
+                                    </div> 
+                                    <div class="row">
+                                        <div class="col-6">Active Scans:</div>
+                                        <div class="col-6 text-right" id="activescans-groupstatus">{{ resourcegroups.active_scans_count }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Running Scans:</div>
+                                        <div class="col-6 text-right" id="runningscans-groupstatus">{{ resourcegroups.running_scans_count }}</div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="card-body" id="stable-groupstatus-hosts">
                                     <div class="row">
                                         <div class="col-6">Hosts Up: </div>
-                                        <div class="col-6 text-right" id="hostsup-groupstatus">0</div>
+                                        <div class="col-6 text-right" id="hostsup-groupstatus">{{ resourcegroups.hostsup_count }}</div>
                                     </div> 
                                     <div class="row">
                                         <div class="col-6">Hosts Down:</div>
-                                        <div class="col-6 text-right" id="hostsdown-groupstatus">0</div>
+                                        <div class="col-6 text-right" id="hostsdown-groupstatus">{{ resourcegroups.hostsdown_count }}</div>
                                     </div>
                                     <div class="row">
                                         <div class="col-6">Hosts Total:</div>
-                                        <div class="col-6 text-right" id="hoststotal-groupstatus">0</div>
+                                        <div class="col-6 text-right" id="hoststotal-groupstatus">{{ resourcegroups.hosts_count }}</div>
                                     </div>
                                 </div>
                             </div>            
@@ -131,11 +143,55 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
+            Scans for group <b>{{ resourcegroups.name | title }}</b>
+        </div>
+        <div class="card-body">
+        {% if resourcegroups.scans_for_group %}
+            <table id="datatablesSimpleGrSc" class="table" report-url="{% url 'website:scans-group-refresh' resourcegroups.id %}">
+                <thead>
+                    <tr>
+                        <th>Last Execution at</th>
+                        <th>Next Execution at</th>
+                        <th>Name</th>
+                        <th>Current Status</th>
+                        <th>Active</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Last Execution at</th>
+                        <th>Next Execution at</th>
+                        <th>Name</th>
+                        <th>Current Status</th>
+                        <th>Active</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                {% for scan in resourcegroups.scans_for_group %}
+                    <tr>
+                        <td>{{ scan.formatted_last_executed }}</td>
+                        <td>{{ scan.formatted_next_execution_at }}</td>
+                        <td><a href="{% url 'website:scan-detail' scan.pk %}"> {{ scan.scanName }}</a></td>
+                        <td class="table-default">{{ scan.formatted_status }}</td>
+                        <td class="table-default">{{ scan.formatted_active }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        {% else %}
+            <p>'There are no scans registered for group "{{ resourcegroups.name | title }}" in the database.' </p>
+        {% endif %}
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
             Hosts for group <b>{{ resourcegroups.name | title }}</b>
         </div>
         <div class="card-body">
-        {% if hosts_for_group %}
-            <table id="datatablesSimple4" class="table" report-url="{% url 'website:hosts-refresh' resourcegroups.id %}">
+        {% if resourcegroups.hosts_for_group %}
+            <table id="datatablesSimpleGrHo" class="table" report-url="{% url 'website:hosts-refresh' resourcegroups.id %}">
                 <thead>
                     <tr>
                         <th>Main Address</th>
@@ -159,7 +215,7 @@
                     </tr>
                 </tfoot>
                 <tbody>
-                    {% for host in hosts_for_group %}
+                    {% for host in resourcegroups.hosts_for_group %}
                     <tr>
                         <td>{{ host.main_address }}</td>
                         <td>{{ host.hostnames }}</td>

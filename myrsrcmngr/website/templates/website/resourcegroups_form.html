@@ -9,13 +9,29 @@
       </div>
       <div class="card-body bg-light">
         <div>
-          <form action="" method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <div></div>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {{ form.name | as_crispy_field }}
+                {{ form.description | as_crispy_field }}
+                {{ form.ips_or_subnet_type | as_crispy_field }}
+                {{ form.ips_or_subnet | as_crispy_field }}
             <input type="submit" class="btn btn-info" value="Save">
             <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{% url 'website:groups-list' %}';return false;">
-          </form>
+            </form>
         </div>
       </div>
     </div>

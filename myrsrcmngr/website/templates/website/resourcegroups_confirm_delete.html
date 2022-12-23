@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container">
+  <div class="card mx-auto d-flex" style="width: 75%;">
+    <div class="card-header bg-light">
+        <i class="fas fa-table me-1"></i>
+        {% translate 'Delete group' %}
+    </div>
+    <div class="card-body bg-white">
+      <p>{% translate 'Are you sure you want to delete the group:' %} {{ resourcegroups.name | title }}?</p>
+    </div>
+    <div class="card-body bg-white">
+      <div>
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="submit" class = "btn btn-danger" value="{% translate 'Yes, delete' %}">
+          <input type="submit" class = "btn btn-secondary" value="{% translate 'Cancel' %}" onclick="window.location.href='{% url 'website:groups-detail' resourcegroups.id %}';return false;">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -11,6 +11,7 @@ class resourcegroups(models.Model):
     name = models.CharField("Group Name",max_length=200, validators=[MinLengthValidator(3),])
     description = models.CharField("Description",max_length=600, blank=True, null=True)
     user = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)
+    ip_addresses = models.TextField("IP Addresses",blank=True, null=True)
     def __str__(self):
         return self.name
     
@@ -25,6 +26,42 @@ class resourcegroups(models.Model):
             return DateFormat(self.updated_at).format("Y-m-d H:i:s")
         else:
             return None
+    
+    def scans_for_group(self):
+        return self.scans_set.all()
+    
+    def hosts_for_group(self):
+        return self.hosts_set.all()
+
+    def scans_count(self):
+        return self.scans_set.count()
+    
+    def hosts_count(self):
+        return self.hosts_set.count()
+    
+    def active_scans_count(self):
+        allscans = self.scans_set.all()
+        if allscans:
+            return allscans.filter(active=True).count()
+        return 0
+    
+    def running_scans_count(self):
+        allscans = self.scans_set.all()
+        if allscans:
+            return allscans.filter(active=True, status=2).count()
+        return 0
+    
+    def hostsup_count(self):
+        allhosts = self.hosts_set.all()
+        if allhosts:
+            return allhosts.filter(status="up").count()
+        return 0
+    
+    def hostsdown_count(self):
+        allhosts = self.hosts_set.all()
+        if allhosts:
+            return allhosts.filter(status="down").count()
+        return 0
     
 class scans(models.Model):
     create_date = models.DateTimeField("Date of Creation",auto_now_add=True)
