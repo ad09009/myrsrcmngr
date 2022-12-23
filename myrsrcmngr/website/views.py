@@ -382,7 +382,6 @@ class ResourcegroupUpdateView(GroupOwnerUpdateView):
 
 class ResourcegroupDeleteView(GroupOwnerDeleteView):
     model = resourcegroups
-    form_class = GroupsForm
     # By convention:
     # template_name = "website/resourcegroups_confirm_delete.html"
     

@@ -103,3 +103,12 @@ class GroupsForm(forms.ModelForm):
             raise forms.ValidationError('Invalid choice.')
 
         return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.subnet:
+            self.fields['ips_or_subnet'].initial = self.instance.subnet
+            self.fields['ips_or_subnet_type'].initial = self.fields['ips_or_subnet_type'].choices[0][0]
+        else:
+            self.fields['ips_or_subnet'].initial = self.instance.ip_addresses
+            self.fields['ips_or_subnet_type'].initial = self.fields['ips_or_subnet_type'].choices[1][0]

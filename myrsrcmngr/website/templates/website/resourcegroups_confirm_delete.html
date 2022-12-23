@@ -14,6 +14,20 @@
       <div>
         <form action="" method="POST">
           {% csrf_token %}
+          {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
           <input type="submit" class = "btn btn-danger" value="{% translate 'Yes, delete' %}">
           <input type="submit" class = "btn btn-secondary" value="{% translate 'Cancel' %}" onclick="window.location.href='{% url 'website:groups-detail' resourcegroups.id %}';return false;">
         </form>

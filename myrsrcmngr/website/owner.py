@@ -3,6 +3,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, ListView, D
 from django.urls import reverse_lazy
 from datetime import datetime, timedelta
 from .models import scans
+from django.http import HttpResponseRedirect
 
 class OwnerCreateView(LoginRequiredMixin, CreateView):
 
@@ -73,3 +74,9 @@ class GroupOwnerDeleteView(LoginRequiredMixin, DeleteView):
         if self.request.user.is_superuser:
             return qs
         return qs.filter(user=self.request.user)# again, a limit to what they can delete
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
