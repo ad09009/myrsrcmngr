@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer
+from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer, HostsSerializer
 from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView
 from .forms import GroupsForm
@@ -261,14 +261,17 @@ def group_changes_refresh(request, pk):
         return JsonResponse({"data":totals})
     
 @api_view(['GET'])
-def hostsgroup_refresh(request):
+def hostsgroup_refresh(request, pk):
     if request.method == 'GET':
-        totals = {
-            'groups_created_total': 0,
-            'groups_scans_total': 0,
-            'groups_hosts_total': 0,
-        }
-        return JsonResponse({"data":totals})
+        group = resourcegroups.objects.get(pk=pk)
+        if group:
+            hosts = group.hosts_set.all()
+            if hosts:
+                serializer = HostsSerializer(hosts, many=True)
+                hosts = serializer.data
+        else:
+            hosts = None
+        return JsonResponse({"data":hosts})
     
 @api_view(['GET'])
 def scans_list(request):

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import scans, reports, resourcegroups
+from .models import scans, reports, resourcegroups, hosts
 
 class ScansSerializer(serializers.ModelSerializer):
     resourcegroup_id = serializers.SerializerMethodField()
@@ -55,3 +55,13 @@ class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = reports
         fields = ['started_str', 'endtime_str', 'elapsed', 'num_services', 'hosts_up', 'hosts_down', 'hosts_total', 'id']
+        
+class HostsSerializer(serializers.ModelSerializer):
+    num_of_services = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = hosts
+        fields = ['id', 'main_address', 'hostnames', 'status', 'mac', 'os_fingerprint', 'num_of_services']      
+    
+    def get_num_of_services(self, obj):
+        return obj.num_of_services()

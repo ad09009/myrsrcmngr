@@ -193,6 +193,12 @@ class hosts(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True)
     description = models.CharField(max_length=200, blank=True, null=True)
     
+    def num_of_services(self):
+        allservices = self.services_set.all()
+        if allservices:
+            return allservices.exclude(state__contains="closed").count()
+        return 0
+    
 class services(models.Model):
     port = models.IntegerField()
     state = models.CharField(max_length=50)
