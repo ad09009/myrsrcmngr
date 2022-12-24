@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import scans, reports, resourcegroups, hosts
+from .models import scans, reports, resourcegroups, hosts, services
 
 class ScansSerializer(serializers.ModelSerializer):
     resourcegroup_id = serializers.SerializerMethodField()
@@ -52,16 +52,36 @@ class ResourcegroupsSerializer(serializers.ModelSerializer):
         return obj.formatted_updated_at()
     
 class ReportsSerializer(serializers.ModelSerializer):
+    fstarted = serializers.SerializerMethodField()
+    fended = serializers.SerializerMethodField()
     class Meta:
         model = reports
-        fields = ['started_str', 'endtime_str', 'elapsed', 'num_services', 'hosts_up', 'hosts_down', 'hosts_total', 'id']
+        fields = ['summary', 'fstarted', 'fended', 'elapsed', 'num_services', 'hosts_up', 'hosts_down', 'hosts_total', 'id']
+    
+    def get_fstarted(self, obj):
+        return obj.f_started_str()
+    
+    def get_fended(self, obj):
+        return obj.f_endtime_str()
         
 class HostsSerializer(serializers.ModelSerializer):
     num_of_services = serializers.SerializerMethodField()
-    
+    rgroupname = serializers.SerializerMethodField()
+    rgroupid = serializers.SerializerMethodField()
     class Meta:
         model = hosts
-        fields = ['id', 'main_address', 'hostnames', 'status', 'mac', 'os_fingerprint', 'num_of_services']      
+        fields = ['rgroupname', 'rgroupid', 'id', 'main_address', 'hostnames', 'status', 'mac', 'os_fingerprint', 'num_of_services']      
     
     def get_num_of_services(self, obj):
         return obj.num_of_services()
+    
+    def get_rgroupname(self, obj):
+        return obj.resourcegroup.name
+    
+    def get_rgroupid(self, obj):
+        return obj.resourcegroup.id
+    
+class ServicesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = services
+        fields = ['host', 'port', 'id', 'state', 'protocol', 'name_conc', 'reason', 'service', 'owner', 'banner', 'servicefp', 'tunnel', 'reason_ip', 'reason_ttl']      

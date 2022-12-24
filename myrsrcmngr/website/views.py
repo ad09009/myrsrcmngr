@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer, HostsSerializer
+from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer, HostsSerializer, ServicesSerializer
 from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView
 from .forms import GroupsForm
@@ -13,7 +13,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseNotAllow
 import os
 
 # Create your views here.
-from .models import scans, hosts, reports, resourcegroups
+from .models import scans, hosts, reports, resourcegroups, services
 
 def index(request):
     con = {}
@@ -349,6 +349,7 @@ class HostCreateView(OwnerCreateView):
 
 class HostUpdateView(OwnerUpdateView):
     model = hosts
+    fields = ['name', 'description']
     # By convention:
     # template_name = "website/scans_form.html"
 
@@ -359,12 +360,80 @@ class HostDeleteView(OwnerDeleteView):
     
 class HostsListView(ListView):
     model = hosts
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the default context data
+        context = super().get_context_data(**kwargs)
+        totals = {
+            'total_hosts': hosts.objects.all().filter(is_removed=None).count(),
+            'total_hosts_up': hosts.objects.all().filter(status="up").count(),
+            'total_hosts_down': hosts.objects.all().filter(status="down").count(),
+        }
+        context['totals'] = totals
+        return context
     # By convention:
     # template_name = "website/scans_list.html"
 
 class HostDetailView(DetailView):
     model = hosts
-    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the default context data
+        context = super().get_context_data(**kwargs)
+        totals = {
+                    'num_of_services': self.object.num_of_services(),
+                    'num_open_ports': self.object.num_open_ports(),
+                    'str_open_ports': self.object.str_open_ports(),
+            }
+        context['totals'] = totals
+        context['changes'] = self.object.changes_set.order_by('-id')
+        context['services'] = self.object.services_set.exclude(state__contains='closed').order_by('-id')
+        return context
+
+@api_view(['GET'])
+def host_changes_refresh(request, pk):
+    if request.method == 'GET':
+        host = hosts.objects.get(pk=pk)
+        totals = None
+        if host: 
+            totals = {
+                    'num_of_services': host.num_of_services(),
+                    'num_open_ports': host.num_open_ports(),
+                    'str_open_ports': host.str_open_ports(),
+            }
+        return JsonResponse({"data":totals}) 
+
+def host_services_refresh(request, pk):
+    if request.method == 'GET':
+        host = hosts.objects.get(pk=pk)
+        if host:
+            services = host.services_set.all()
+            if services:
+                serializer = ServicesSerializer(services, many=True)
+                services = serializer.data
+        else:
+            services = None
+        return JsonResponse({"data":services})
+
+@api_view(['GET'])
+def hosts_totals_refresh(request):
+    if request.method == 'GET':
+        totals = {
+            'total_hosts': hosts.objects.all().filter(is_removed=None).count(),
+            'total_hosts_up': hosts.objects.all().filter(status="up").count(),
+            'total_hosts_down': hosts.objects.all().filter(status="down").count(),
+        }
+        return JsonResponse({"data":totals})
+
+@api_view(['GET'])
+def hosts_refresh(request):
+    if request.method == 'GET':
+        allhosts = hosts.objects.all()
+        if allhosts:
+            serializer = HostsSerializer(allhosts, many=True)
+            allhosts = serializer.data
+        else:
+            allhosts = None
+        return JsonResponse({"data":allhosts})
+
 
 #CRUD views for Groups
 
@@ -398,6 +467,18 @@ class ResourcegroupDetailView(DetailView):
 
 class ReportsListView(ListView):
     model = reports
+    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the default context data
+        context = super().get_context_data(**kwargs)
+        totals = {
+                'total_reports': reports.objects.all().count(),
+                'total_success_reports': reports.objects.all().filter(parse_success=True).count(),
+                'total_failed_reports': reports.objects.all().filter(parse_success=False).count(),
+            }
+        context['totals'] = totals
+        return context
+    
     # By convention:
     # template_name = "website/scans_list.html"
 
@@ -521,6 +602,27 @@ def set_standard_report(request, pk):
         report.save()
         return JsonResponse({"standard":standard})
 
+@api_view(['GET'])
+def reports_totals_refresh(request):
+    if request.method == 'GET':
+        totals = {
+            'total_reports': reports.objects.all().count(),
+            'total_success_reports': reports.objects.all().filter(parse_success=True).count(),
+            'total_failed_reports': reports.objects.all().filter(parse_success=False).count(),
+        }
+        return JsonResponse({"data":totals})
+    
+@api_view(['GET'])
+def reports_refresh(request):
+    if request.method == 'GET':
+        allreports = reports.objects.all()
+        if allreports:
+            serializer = ReportsSerializer(allreports, many=True)
+            allreports = serializer.data
+        else:
+            allreports = None
+        return JsonResponse({"data":allreports})
+
 def GlobalSearch(request):
     template_name = 'website/search.html'
     if request.method == 'POST':
@@ -532,3 +634,6 @@ def GlobalSearch(request):
         return render(request, template_name, {'searched': searched, 'foundscans':foundscans, 'foundhosts':foundhosts, 'foundresourcegroups':foundresourcegroups})
     else:
         return render(request, template_name, {})
+
+class ServiceDetailView(DetailView):
+    model = services

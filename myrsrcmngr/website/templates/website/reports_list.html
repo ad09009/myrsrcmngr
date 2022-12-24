@@ -10,35 +10,35 @@
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <ul class="nav nav-tabs float-xs-left" id="scanlistTab" role="tablist">
+                    <ul class="nav nav-tabs float-xs-left" id="reportlistTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="scan-info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">Info</button>
+                        <button class="nav-link active" id="reports-info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">Info</button>
                         </li>
                         {% if user.is_authenticated %}
                         <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="create-scan-tab" data-bs-toggle="tab" data-bs-target="#create-scan-tab-pane" type="button" role="tab" aria-controls="create-scan-tab-pane" aria-selected="false">Options</button>
+                        <button class="nav-link" id="report-options-tab" data-bs-toggle="tab" data-bs-target="#report-options-tab-pane" type="button" role="tab" aria-controls="report-options-tab-pane" aria-selected="false">Options</button>
                         </li>
                         {% else %}
                         <li class="nav-item" role="presentation">
-                        <button class="nav-link btn-primary" id="create-scan-tab" data-bs-toggle="tab" data-bs-target="#create-scan-tab-pane" type="button" role="tab" aria-controls="create-scan-tab-pane" aria-selected="false" disabled>Options</button>
+                        <button class="nav-link btn-primary" id="report-options-tab" data-bs-toggle="tab" data-bs-target="#report-options-tab-pane" type="button" role="tab" aria-controls="report-options-tab-pane" aria-selected="false" disabled>Options</button>
                         </li>
                         {% endif %}
                     </ul>
                 </div>
-                <div class="tab-content" id="scanlistTabContent">
-                    <div class="tab-pane fade show active" report-url="{% url 'website:scans-totals' %}" id="info-tab-pane" role="tabpanel" aria-labelledby="scan-info-tab" tabindex="0">
+                <div class="tab-content" id="reportlistTabContent">
+                    <div class="tab-pane fade show active" report-url="{% url 'website:reports-totals' %}" id="report-info-tab-pane" role="tabpanel" aria-labelledby="reports-info-tab" tabindex="0">
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
-                                <li class="list-group-item" id="scansCreatedTotal">0 scans created</li>
-                                <li class="list-group-item" id="scansActiveTotal">0 active scans</li>
-                                <li class="list-group-item" id="scansRunningTotal">0 scans running</li>
+                                <li class="list-group-item" id="reportsCreatedTotal">{{totals.total_reports}} total reports created</li>
+                                <li class="list-group-item" id="reportsParsedTotal">{{totals.total_success_reports}} succesfully parsed</li>
+                                <li class="list-group-item" id="reportsFailedTotal">{{totals.total_failed_reports}} failed</li>
                               </ul>                            
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="create-scan-tab-pane" role="tabpanel" aria-labelledby="create-scan-tab" tabindex="0">
+                    <div class="tab-pane fade" id="report-options-tab-pane" role="tabpanel" aria-labelledby="report-options-tab" tabindex="0">
                         <div class="card-body">
                             {% if user.is_authenticated %}
-                                <a href="{% url 'website:new-scan' %}" class="btn btn-primary">Create New Scan</a>
+                                <a href="#" class="btn btn-primary">Download All Reports</a>
                             {% endif %}
                         </div>
                     </div>
@@ -57,42 +57,53 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
-            Scans
+            Reports
         </div>
         <div class="card-body">
-        {% if scans_list %}
-            <table id="datatablesSimple5" class="table" report-url="{% url 'website:scans-refresh' %}">
+        {% if reports_list %}
+            <table id="datatablesSimple4" class="table" report-url="{% url 'website:reports-all-refresh' %}">
                 <thead>
                     <tr>
-                        <th>Last Execution at</th>
-                        <th>Next Execution at</th>
-                        <th>Name</th>
-                        <th>Current Status</th>
-                        <th>Active</th>
-                        <th>Group</th>
+                        <th>Started at</th>
+                        <th>Ended at</th>
+                        <th>Duration</th>
+                        <th>Number of Services</th>
+                        <th>Hosts Up</th>
+                        <th>Hosts Down</th>
+                        <th>Hosts Total</th>
+                        <th>Link</th>
                     </tr>
                 </thead>
                 <tfoot>
                     <tr>
-                        <th>Last Execution at</th>
-                        <th>Next Execution at</th>
-                        <th>Name</th>
-                        <th>Current Status</th>
-                        <th>Active</th>
-                        <th>Group</th>
+                        <th>Started at</th>
+                        <th>Ended at</th>
+                        <th>Duration (in seconds)</th>
+                        <th>Number of Services</th>
+                        <th>Hosts Up</th>
+                        <th>Hosts Down</th>
+                        <th>Hosts Total</th>
+                        <th>Link</th>
                     </tr>
                 </tfoot>
                 <tbody>
-                {% for scan in scans_list %}
+                    {% for report in reports_list %}
                     <tr>
-                        <td>{{ scan.formatted_last_executed }}</td>
-                        <td>{{ scan.formatted_next_execution_at }}</td>
-                        <td><a href="{% url 'website:scan-detail' scan.pk %}"> {{ scan.scanName }}</a></td>
-                        <td class="table-default">{{ scan.formatted_status }}</td>
-                        <td class="table-default">{{ scan.formatted_active }}</td>
-                        <td><a href="{% url 'website:groups-detail' scan.resourcegroup.id %}"> {{ scan.resourcegroup }}</a></td>
+                        <td>{{ report.f_started_str }}</td>
+                        <td>{{ report.f_endtime_str }}</td>
+                        <td>{{ report.elapsed }}</td>
+                        <td>{{ report.num_services }}</td>
+                        <td>{{ report.hosts_up }}</td>
+                        <td>{{ report.hosts_down }}</td>
+                        <td>{{ report.hosts_total }}</td>
+                        {% if report.f_started_str %}
+                        <td><a href="{% url 'website:report-detail' report.id %}">View</a></td>
+                        {% else %}
+                        <td>{{ report.summary }}</td>
+                        {% endif %}
                     </tr>
-                {% endfor %}
+                    {% endfor %}
+                <!--JSON response-->
 
                 </tbody>
             </table>
@@ -105,5 +116,5 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'website/js/scanlistupdate.js' %}"></script>
+<script src="{% static 'website/js/reportlistupdate.js' %}"></script>
 {% endblock js %}

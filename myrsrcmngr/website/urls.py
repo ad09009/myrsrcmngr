@@ -33,14 +33,17 @@ urlpatterns = [
     path('groups/api/refresh/totals/', views.grouplist_totals_refresh, name='groups-totals'),
     path('groups/api/refresh/changes/<int:pk>/', views.group_changes_refresh, name='groups-changes'),
     path('groups/api/refresh/hosts/<int:pk>/', views.hostsgroup_refresh, name='hosts-refresh'),
-    path('groups/api/refresh/hosts/<int:pk>/', views.hostsgroup_refresh, name='hosts-refresh'),
 
     #Hosts CRUD
     path('hosts/', views.HostsListView.as_view(), name='hosts-list'),
     path('hosts/<int:pk>/', views.HostDetailView.as_view(), name='hosts-detail'),
+    path('hosts/<int:pk>/edit', views.HostUpdateView.as_view(), name='edit-host'),
     
     #Hosts API for AJAX calls
-    
+    path('hosts/api/refresh/totals/', views.hosts_totals_refresh, name='hosts-totals'),
+    path('hosts/api/refresh/hosts/', views.hosts_refresh, name='hosts-all-refresh'),
+    path('hosts/api/refresh/changes/<int:pk>/', views.host_changes_refresh, name='host-changes'),
+    path('hosts/api/refresh/services/<int:pk>/', views.host_services_refresh, name='host-services'),
     
     #Reports CRUD
     path('reports/', views.ReportsListView.as_view(), name='reports-list'),
@@ -49,9 +52,11 @@ urlpatterns = [
     
     #Reports API for AJAX calls 
     path('reports/api/toggle/<int:pk>/', views.set_standard_report, name='set-standard-report'),
+    path('reports/api/refresh/totals/', views.reports_totals_refresh, name='reports-totals'),
+    path('reports/api/refresh/reports/', views.reports_refresh, name='reports-all-refresh'),
     
     #Services CRUD
-    
+    path('services/<int:pk>', views.ServiceDetailView.as_view(), name='service-detail'),
     
     #Services API for AJAX calls
     

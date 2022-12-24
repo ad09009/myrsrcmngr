@@ -161,15 +161,15 @@
                                     <hr>
                                     <div class="row">
                                         <div class="col-6">Hosts up:</div>
-                                        {% if reports.report_hostup_cur %}
-                                        <div class="col-6 text-right">{{ reports.report_hostup_cur }} ({{ reports.report_hostup_prev }})</div>
+                                        {% if reports.report_hostsup_cur %}
+                                        <div class="col-6 text-right">{{ reports.report_hostsup_cur }} ({{ reports.report_hostsup_prev }})</div>
                                         {% else %}
                                         <div class="col-6 text-right">{{ reports.hosts_up }} (no change) </div>
                                         {% endif %}
                                     </div>
                                     <div class="row">
                                         <div class="col-6">Hosts down:</div>
-                                        {% if reports.report_hostdown_cur %}
+                                        {% if reports.report_hostsdown_cur %}
                                         <div class="col-6 text-right">{{ reports.report_hostsdown_cur }} ({{ reports.report_hostsdown_prev }})</div>
                                         {% else %}
                                         <div class="col-6 text-right">{{ reports.hosts_down }} (no change) </div>

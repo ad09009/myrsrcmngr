@@ -136,9 +136,9 @@ function toggleActive() {
     var table = $('#datatablesSimple4').DataTable( {
         ajax: url,
         columns: [
-            { data: 'started_str', title: 'Started at' },
-            { data: 'endtime_str', title: 'Ended at' },
-            { data: 'elapsed', title: 'Duration' },
+            { data: 'fstarted', title: 'Started at' },
+            { data: 'fended', title: 'Ended at' },
+            { data: 'elapsed', title: 'Duration (in seconds)' },
             { data: 'num_services', title: 'Number of Services' },
             { data: 'hosts_up', title: 'Hosts Up' },
             { data: 'hosts_down', title: 'Hosts Down' },
@@ -147,11 +147,11 @@ function toggleActive() {
               data: 'id',
               title: 'URL',
               render: function(data, type, row, meta) {
-                console.log(row.id, row.started_str, row.endtime_str, row.elapsed, row.num_services, row.hosts_up, row.hosts_down, row.hosts_total)
-                return '<a href=' + '/reports/' + row.id + '>View Report</a>';
+                        return row.fstarted === null ? row.summary : '<a href=' + '/reports/' + row.id + '>View Report</a>';
               }
             },
         ],
+        order: [[0, 'desc']],
         pageLength: 10,
         lenghtChange: true,
         autoWidth: false,

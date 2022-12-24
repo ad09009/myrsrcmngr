@@ -12,33 +12,33 @@
                 <div class="card-header">
                     <ul class="nav nav-tabs float-xs-left" id="scanlistTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="scan-info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">Info</button>
+                        <button class="nav-link active" id="host-info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">Info</button>
                         </li>
                         {% if user.is_authenticated %}
                         <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="create-scan-tab" data-bs-toggle="tab" data-bs-target="#create-scan-tab-pane" type="button" role="tab" aria-controls="create-scan-tab-pane" aria-selected="false">Options</button>
+                        <button class="nav-link" id="edit-host-tab" data-bs-toggle="tab" data-bs-target="#edit-host-tab-pane" type="button" role="tab" aria-controls="edit-host-tab-pane" aria-selected="false">Options</button>
                         </li>
                         {% else %}
                         <li class="nav-item" role="presentation">
-                        <button class="nav-link btn-primary" id="create-scan-tab" data-bs-toggle="tab" data-bs-target="#create-scan-tab-pane" type="button" role="tab" aria-controls="create-scan-tab-pane" aria-selected="false" disabled>Options</button>
+                        <button class="nav-link btn-primary" id="edit-host-tab" data-bs-toggle="tab" data-bs-target="#edit-host-tab-pane" type="button" role="tab" aria-controls="edit-host-tab-pane" aria-selected="false" disabled>Options</button>
                         </li>
                         {% endif %}
                     </ul>
                 </div>
-                <div class="tab-content" id="scanlistTabContent">
-                    <div class="tab-pane fade show active" report-url="{% url 'website:scans-totals' %}" id="info-tab-pane" role="tabpanel" aria-labelledby="scan-info-tab" tabindex="0">
+                <div class="tab-content" id="hostlistTabContent">
+                    <div class="tab-pane fade show active" report-url="{% url 'website:hosts-totals' %}" id="host-info-tab-pane" role="tabpanel" aria-labelledby="host-info-tab" tabindex="0">
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
-                                <li class="list-group-item" id="scansCreatedTotal">...</li>
-                                <li class="list-group-item" id="scansActiveTotal">...</li>
-                                <li class="list-group-item" id="scansRunningTotal">...</li>
+                                <li class="list-group-item" id="hostsCreatedTotal">{{totals.total_hosts}} hosts TOTAL</li>
+                                <li class="list-group-item" id="hostsUpTotal">{{totals.total_hosts_up}} hosts UP</li>
+                                <li class="list-group-item" id="hostsDownTotal">{{totals.total_hosts_down}} hosts DOWN</li>
                               </ul>                            
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="create-scan-tab-pane" role="tabpanel" aria-labelledby="create-scan-tab" tabindex="0">
+                    <div class="tab-pane fade" id="edit-host-tab-pane" role="tabpanel" aria-labelledby="edit-host-tab" tabindex="0">
                         <div class="card-body">
                             {% if user.is_authenticated %}
-                                <a href="{% url 'website:new-scan' %}" class="btn btn-primary">Create New Host</a>
+                                <a href="{#" class="btn btn-danger">Delete All</a>
                             {% endif %}
                         </div>
                     </div>
@@ -57,45 +57,49 @@
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
-            Scans
+            Hosts
         </div>
         <div class="card-body">
-        {% if scans_list %}
-            <table id="datatablesSimple5" class="table" report-url="{% url 'website:scans-refresh' %}">
-                <thead>
-                    <tr>
-                        <th>Last Execution at</th>
-                        <th>Next Execution at</th>
-                        <th>Name</th>
-                        <th>Current Status</th>
-                        <th>Active</th>
-                        <th>Group</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>Last Execution at</th>
-                        <th>Next Execution at</th>
-                        <th>Name</th>
-                        <th>Current Status</th>
-                        <th>Active</th>
-                        <th>Group</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                {% for scan in scans_list %}
-                    <tr>
-                        <td>{{ scan.formatted_last_executed }}</td>
-                        <td>{{ scan.formatted_next_execution_at }}</td>
-                        <td><a href="{% url 'website:scan-detail' scan.pk %}"> {{ scan.scanName }}</a></td>
-                        <td class="table-default">{{ scan.formatted_status }}</td>
-                        <td class="table-default">{{ scan.formatted_active }}</td>
-                        <td><a href="{% url 'website:groups-detail' scan.resourcegroup.id %}"> {{ scan.resourcegroup }}</a></td>
-                    </tr>
+        {% if hosts_list %}
+        <table id="datatablesSimpleGrHo" class="table" report-url="{% url 'website:hosts-all-refresh' %}">
+            <thead>
+                <tr>
+                    <th>Main Address</th>
+                    <th>Hostnames</th>
+                    <th>Status</th>
+                    <th>MAC Address</th>
+                    <th>OS Fingerprint</th>
+                    <th>Number of Services</th>
+                    <th>Group</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th>Main Address</th>
+                    <th>Hostnames</th>
+                    <th>Status</th>
+                    <th>MAC Address</th>
+                    <th>OS Fingerprint</th>
+                    <th>Number of Services</th>
+                    <th>Group</th>
+                </tr>
+            </tfoot>
+            <tbody>
+                {% for host in hosts_list %}
+                <tr>
+                    <td><a href="{% url 'website:hosts-detail' host.id %}">{{ host.main_address }}</a></td>
+                    <td>{{ host.hostnames }}</td>
+                    <td>{{ host.status }}</td>
+                    <td>{{ host.mac }}</td>
+                    <td>{{ host.os_fingerprint }}</td>
+                    <td>{{ host.num_of_services }}</td>
+                    <td><a href="{% url 'website:groups-detail' host.resourcegroup.id %}">{{host.resourcegroup}}</a></td>
+                </tr>
                 {% endfor %}
+            <!--JSON response-->
 
-                </tbody>
-            </table>
+            </tbody>
+        </table>
         {% else %}
             <p>'There are no hosts in the database.' </p>
         {% endif %}
@@ -105,5 +109,5 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'website/js/scanlistupdate.js' %}"></script>
+<script src="{% static 'website/js/hostlistupdate.js' %}"></script>
 {% endblock js %}
