@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -8,6 +8,9 @@ from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSeria
 from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView
 from .forms import GroupsForm
+from django.urls import reverse
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseNotAllowed
+import os
 
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups
@@ -112,9 +115,6 @@ def dashboard(request):
         print(key, value)
     print('something')
     return render(request, 'index.html', context)
-
-def about(request):
-    return render(request, 'about.html', {})
 
 #CRUD views for Scans
 
@@ -401,9 +401,125 @@ class ReportsListView(ListView):
     # By convention:
     # template_name = "website/scans_list.html"
 
+def download_report(request, pk):
+    # Get the report object with the given primary key
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+    report = get_object_or_404(reports, pk=pk)
+
+    # Check if the report has a file associated with it
+    if not report.path_to:
+        # If not, return a 404 error
+        return HttpResponseNotFound("No file associated with this report")
+
+    # Get the file path for the report's file
+    file_path = report.path_to
+
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        # If not, return a 404 error
+        return HttpResponseNotFound("File not found")
+
+    # Open the file in binary mode
+    with open(file_path, 'rb') as f:
+        # Create a Django response object with the file's contents
+        response = HttpResponse(f.read(), content_type="application/xml")
+        # Set the response's content-disposition header to tell the browser to download the file
+        response['Content-Disposition'] = f'attachment; filename="{report.download_name()}.xml"'
+        # Return the response
+        return response
+
+
 class ReportDetailView(DetailView):
     model = reports
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the default context data
+        context = super().get_context_data(**kwargs)
+
+        # Add additional querysets or dictionaries to the context
+        changed_hosts = []
+
+        allhosts = hosts.objects.filter(reports_belonging_to=self.object.id)
+        allchanges = self.object.changes_set.all().exclude(attribute='elapsed').exclude(host=None)
+        for onehost in allhosts:
+            one_row = {'main_address':'',
+                        'status':'',
+                        'hostnames':'',
+                        'os_fingerprint':'',
+                        'cur_open_ports_nr':0,
+                        'cur_open_ports':'',
+                        'open_ports_nr':0,
+                        'open_ports':'',
+                        'change':'',
+                        'other_host_changes':0,
+                        'other_service_changes':0,
+                        'plusorminus':0,
+                        'id':0,
+                        }
+            #host specific changes
+            for change in allchanges.filter(host=onehost, service=None):
+                one_row['id'] = change.host.id
+                one_row['main_address'] = change.host.main_address
+                one_row['change'] = change.status
+                if change.attribute == 'status':
+                    one_row['status'] = change.cur_val
+                    
+                elif change.attribute == 'os_fingerprint':
+                    one_row['os_fingerprint'] = change.cur_val
+                
+                elif change.attribute == 'hostnames':
+                    one_row['hostnames'] = change.cur_val
+                else:
+                    one_row['other_host_changes'] += 1
+           
+            #service specific changes
+            open_ports = []
+            for change in allchanges.filter(host=onehost).exclude(service=None):
+                one_row['id'] = change.host.id
+                one_row['main_address'] = change.host.main_address
+                if change.attribute == 'state' and change.cur_val == 'open':
+                    one_row['open_ports_nr'] += 1
+                    open_ports.append(change.cur_val)
+                elif change.attribute == 'state' and change.cur_val == 'closed' and change.prev_val == 'open':
+                    one_row['open_ports_nr'] -= 1
+                elif change.attribute == 'state' and change.cur_val == 'filtered' and change.prev_val == 'open':
+                    one_row['open_ports_nr'] -= 1
+                else:
+                    one_row['other_service_changes'] += 1
+                    
+            one_row['open_ports'] = ', '.join(open_ports)
+            one_row['cur_open_ports'] = onehost.str_open_ports()
+            one_row['cur_open_ports_nr'] = onehost.num_open_ports()
+            if one_row['open_ports_nr'] > 0:
+                one_row['plusorminus'] = True
+            else:
+                one_row['plusorminus'] = False
+            if one_row['id'] != 0:
+                changed_hosts.append(one_row)
+        
+        context['hosts'] = changed_hosts
+        context['changes'] = self.object.changes_set.order_by('-id')
+        context['download_url'] = reverse('website:download_report', args=[self.object.id])
+        return context
     
+@api_view(['POST', 'GET'])
+def set_standard_report(request, pk):
+    if request.method == 'POST':
+        standard = request.POST.get('standard')
+        report = get_object_or_404(reports, pk=pk)
+        if standard:
+            #Get all reports belonging to the same scan that have standard set to 1 and are not the current report
+            other_standard_reports = reports.objects.filter(scan=report.scan).exclude(standard=0).exclude(id=report.id)
+        
+            #Change all other standard reports to 0
+            for other_standard_report in other_standard_reports:
+                other_standard_report.standard = 0
+                other_standard_report.save()
+        
+        #Set the current report to standard
+        report.standard = standard
+        report.save()
+        return JsonResponse({"standard":standard})
 
 def GlobalSearch(request):
     template_name = 'website/search.html'

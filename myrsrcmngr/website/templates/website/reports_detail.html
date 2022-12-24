@@ -1,7 +1,265 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-//write a bootstrap card here that has a panel of information and a button to switch on and off the scan that it represents
-//the button should be a toggle button that is either on or off
-//the card should have a title that is the name of the scan
-//it should have a description that is the description of the scan
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ reports | title }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Group: <a href="{% url 'website:groups-detail' reports.resourcegroup.id %}">{{ reports.resourcegroup | upper }}</a>
+        </li>
+        <li class="breadcrumb-item active">Scan: <a href="{% url 'website:scan-detail' reports.scan.id %}">{{ reports.scan.scanName | title }}</a>
+        </li>
+    </ol>
+    <div class="row">
+        <div class="col-xl-6 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs float-xs-left" id="myGroupTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="report-info-tab" data-bs-toggle="tab" data-bs-target="#report-info-tab-pane" type="button" role="tab" aria-controls="report-info-tab-pane" aria-selected="true">Info</button>
+                        </li>
+                        {% if user.is_superuser %}
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="report-options-tab" data-bs-toggle="tab" data-bs-target="#report-options-tab-pane" type="button" role="tab" aria-controls="report-options-tab-pane" aria-selected="false">Options</button>
+                        </li>
+                        {% else %}
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="report-options-tab" data-bs-toggle="tab" data-bs-target="#report-options-tab-pane" type="button" role="tab" aria-controls="report-options-tab-pane" aria-selected="false" disabled>Options</button>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                    <div class="tab-content" id="myReportTabContent">
+                        <div class="tab-pane fade show active" id="report-info-tab-pane" role="tabpanel" aria-labelledby="report-info-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body">
+                                    <h6>Summary</h6>
+                                    <p class="card-text">{{ reports.summary }}</p>
+                                </div>
+                                <div class="card-body">
+                                    <h6>Command Line</h6>
+                                    <p class="card-text">{{ reports.full_cmndline }}</p>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-6">Started:</div>
+                                    <div class="col-6 text-right">{{ reports.f_started_str }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">Finished:</div>
+                                    <div class="col-6 text-right">{{ reports.f_endtime_str }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">Time elapsed:</div>
+                                    <div class="col-6 text-right">{{ reports.elapsed }} seconds</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="report-options-tab-pane" role="tabpanel" aria-labelledby="report-options-tab" tabindex="0">
+                            <div class="card-body">
+                                {% if user.is_authenticated %}
+                                    <a href="{{ download_url }}" class="btn btn-primary">Download Report</a>
+                                {% endif %}
+                                {% if user.is_superuser %}
+                                    {% if reports.standard %}
+                                        <button id="toggle-standard" scan-ajax-target="{% url 'website:set-standard-report' reports.id %}" value="{{scans.active}}" class="btn btn-danger d-inline-block my-auto">Remove as Standard</button>
+                                        <input type="hidden" id="standard" value="1">
+                                    {% else %}
+                                        <button id="toggle-standard" scan-ajax-target="{% url 'website:set-standard-report' reports.id %}" value="{{scans.active}}" class="btn btn-success d-inline-block my-auto">Set as Standard</button>
+                                        <input type="hidden" id="standard" value="0">
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white" href="#">View All Info</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-md-6">
+            <div class="card bg-secondary text-white mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs float-xs-left" id="myReportTab2" role="tablist">
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="report-status-tab" data-bs-toggle="tab" data-bs-target="#report-status-tab-pane" type="button" role="tab" aria-controls="report-status-tab-pane" aria-selected="true">Status</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="report-stats-tab" data-bs-toggle="tab" data-bs-target="#report-stats-tab-pane" type="button" role="tab" aria-controls="report-stats-tab-pane" aria-selected="false">Stats</button>
+                        </li>
+                    </ul>
+                </div>
+                    <div class="tab-content" id="myReportTabContent2">
+                        <div class="tab-pane fade show active" id="report-status-tab-pane" role="tabpanel" aria-labelledby="report-status-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">Consistent: </div>
+                                        <div class="col-6 text-right">
+                                            {% if reports.is_consistent %}
+                                                <i class="fas fa-check text-success"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-danger"></i>
+                                            {% endif %}
+                                           </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Parsed:</div>
+                                        <div class="col-6 text-right">
+                                            {% if reports.parse_success %}
+                                                <i class="fas fa-check text-success"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-danger"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Last (for this scan):</div>
+                                        <div class="col-6 text-right">
+                                            {% if reports.is_last %}
+                                                <i class="fas fa-check text-success"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-danger"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Is Set as Standard:</div>
+                                        <div class="col-6 text-right">
+                                            {% if reports.standard %}
+                                                <i class="fas fa-check text-success" id="standardCheck"></i>
+                                            {% else %}
+                                                <i class="fas fa-times text-danger" id="standardCheck"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">Total Related Hosts:</div>
+                                        <div class="col-6 text-right">{{ reports.hosts_count }}</div>
+                                    </div> 
+                                    <div class="row">
+                                        <div class="col-6">Total Related Services:</div>
+                                        <div class="col-6 text-right">{{ reports.services_count }}</div>
+                                    </div>
+                                </div>
+                            </div>            
+                        </div>
+                        <div class="tab-pane fade" id="report-stats-tab-pane" role="tabpanel" aria-labelledby="report-stats-tab" tabindex="0">
+                            <div class="card-body">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">Report Compared to:</div>
+                                        <div class="col-6 text-right"><a class="small text-white" href="{% url 'website:report-detail' reports.prev_rep %}">View Report</a></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Total Report Level Changes:</div>
+                                        <div class="col-6 text-right">{{ reports.changes_count }}</div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-6">Hosts up:</div>
+                                        {% if reports.report_hostup_cur %}
+                                        <div class="col-6 text-right">{{ reports.report_hostup_cur }} ({{ reports.report_hostup_prev }})</div>
+                                        {% else %}
+                                        <div class="col-6 text-right">{{ reports.hosts_up }} (no change) </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Hosts down:</div>
+                                        {% if reports.report_hostdown_cur %}
+                                        <div class="col-6 text-right">{{ reports.report_hostsdown_cur }} ({{ reports.report_hostsdown_prev }})</div>
+                                        {% else %}
+                                        <div class="col-6 text-right">{{ reports.hosts_down }} (no change) </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">Changes in NMAP Call:</div>
+                                        {% if reports.report_nmap_changes %}
+                                        <div class="col-6 text-right">{{ report_nmap_changes }}</div>
+                                        {% else %}
+                                        <div class="col-6 text-right">None</div>
+                                        {% endif %}
+                                    </div>                
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white" href="#">View All Info</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Notable Changes in <b>{{ reports | title }}</b>
+        </div>
+        <div class="card-body">
+        {% if hosts %}
+            <table id="datatablesSimple" class="table">
+                <thead>
+                    <tr>
+                        <th>Main Address</th>
+                        <th>Status</th>
+                        <th>Hostnames</th>
+                        <th>OS Fingerprint</th>
+                        <th>Open Ports Total</th>
+                        <th>New Open Ports</th>
+                        <th>Other Host Changes</th>
+                        <th>Other Service Changes</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Main Address</th>
+                        <th>Status</th>
+                        <th>Hostnames</th>
+                        <th>OS Fingerprint</th>
+                        <th>Open Ports Total</th>
+                        <th>New Open Ports</th>
+                        <th>Other Host Changes</th>
+                        <th>Other Service Changes</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    {% for host in hosts %}
+                    <tr>
+                        <td><a href="{% url 'website:hosts-detail' host.id %}">{{ host.main_address }}</a></td>
+                        <td>{{ host.status }}</td>
+                        <td>{{ host.hostnames }}</td>
+                        <td>{{ host.os_fingerprint }}</td>
+                        {% if host.plusorminus %}
+                        <td>{{host.cur_open_ports_nr}} (+{{ host.open_ports_nr }})</td>
+                        {% else %}
+                        <td>{{host.cur_open_ports_nr}} (+{{ host.open_ports_nr }})</td>
+                        {% endif %}
+                        {% if host.open_ports %}
+                        <td>{{ host.open_ports }}</td>
+                        {% else %}
+                        <td>None</td>
+                        {% endif %}
+                        <td><a href="{% url 'website:hosts-detail' host.id %}">{{ host.other_host_changes }}</a></td>
+                        <td><a href="{% url 'website:hosts-detail' host.id %}">{{ host.other_service_changes }}</a></td>
+                    </tr>
+                    {% endfor %}
+                <!--JSON response-->
+
+                </tbody>
+            </table>
+        {% else %}
+            <p>'There are no notable changes observed in the "{{ reports | title }}"' </p>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'website/js/reportupdate.js' %}"></script>
+{% endblock %}

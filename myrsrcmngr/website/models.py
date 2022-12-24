@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.dateformat import DateFormat
 from django.core.validators import MinValueValidator, MinLengthValidator
+from datetime import datetime
 
 class resourcegroups(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
@@ -85,13 +86,15 @@ class scans(models.Model):
     resourcegroup = models.ForeignKey(resourcegroups, verbose_name="Group Name", null=True, on_delete=models.SET_NULL)
     
     #scan_templates
-    viens = '-oX -vvv --stats-every 1s --top-ports 100 -T2'
+    viens = '-vvv --stats-every 1s --top-ports 100 -T2'
     divi = '--stats-every 1s --top-ports 100 -T3'
     tris = '--stats-every 1s --top-ports 100 -T4'
+    cetri = '-vvv --stats-every 1s -sV --top-ports 1000'
     SCAN_TEMPLATES = [
         (viens, '-oX -vvv --stats-every 1s --top-ports 100 -T2'),
-        (divi, '--stats-every 1s --top-ports 100 -T3'),
-        (tris, '--stats-every 1s --top-ports 100 -T4'),
+        (divi, '-oX -vvv --stats-every 1s --top-ports 100 -T3'),
+        (tris, '-oX -vvv --stats-every 1s --top-ports 100 -T4'),
+        (cetri, '-vvv --stats-every 1s -sV --top-ports 1000'),
     ]
     ScanTemplate = models.CharField( 
         "Scan Template",
@@ -199,6 +202,25 @@ class hosts(models.Model):
             return allservices.exclude(state__contains="closed").count()
         return 0
     
+    def num_open_ports(self):
+        allservices = self.services_set.all()
+        if allservices:
+            return allservices.filter(state__contains="open").count()
+        return 0
+    
+    def str_open_ports(self):
+        allservices = self.services_set.all()
+        servlist = []
+        servstring = ''
+        if allservices:
+            for service in allservices.filter(state__contains="open"):
+                servlist.append(service.port)
+            servstring = ', '.join(str(e) for e in servlist)
+        return servstring
+    
+    def __str__(self):
+        return self.main_address
+    
 class services(models.Model):
     port = models.IntegerField()
     state = models.CharField(max_length=50)
@@ -216,6 +238,9 @@ class services(models.Model):
     is_added = models.BooleanField(blank=True, null=True)
     host = models.ForeignKey(hosts, on_delete=models.CASCADE)
     reports_belonging_to = models.ManyToManyField("reports", blank = True)
+    
+    def __str__(self):
+        return self.name_conc
     
 class reports(models.Model):
     resourcegroup = models.ForeignKey(resourcegroups, null=True, on_delete=models.SET_NULL)
@@ -240,7 +265,85 @@ class reports(models.Model):
     hosts_a_r = models.ManyToManyField(hosts, blank = True, through = "hosts_added_removed", through_fields=('cur_report','host'))
     is_last = models.BooleanField(default=False)
     parse_success = models.BooleanField(default=True)
+    standard = models.BooleanField(default=False)
     get_latest_by = "-id"
+    
+    def changes_count(self):
+        return self.changes_set.all().filter(host=None, service=None).exclude(attribute='elapsed').count()
+    
+    def report_hostsup_cur(self):
+        try:
+            cur = self.changes_set.all().filter(attribute='hosts_up').order_by('-id').first().cur_val
+        except:
+            cur = None
+        return cur
+    
+    def report_hostsup_prev(self):
+        try:
+            cur = self.changes_set.all().filter(attribute='hosts_up').order_by('-id').first().prev_val
+        except:
+            cur = None
+        return cur
+    
+    def report_hostsdown_cur(self):
+        try:
+            cur = self.changes_set.all().filter(attribute='hosts_down').order_by('-id').first().cur_val
+        except:
+            cur = None
+        return cur
+    
+    def report_hostsdown_prev(self):
+        try:
+            cur = self.changes_set.all().filter(attribute='hosts_down').order_by('-id').first().prev_val
+        except:
+            cur = None
+        return cur
+    
+    def report_nmap_changes(self):
+        try:
+            cur = self.changes_set.all().filter(host=None, service=None).exclude(attribute='elapsed').exclude(attribute='hosts_up').exclude(attribute='hosts_down').count()
+        except:
+            cur = 0
+        return cur
+    
+    def services_count(self):
+        return services.objects.filter(reports_belonging_to=self.id).count()
+    
+    def hosts_count(self):
+        return hosts.objects.filter(reports_belonging_to=self.id).count()
+    
+    def download_name(self):
+        return 'NMAP_report_' + str(self.id)
+    
+    def f_started_str(self):
+        if self.started_str:
+            # Convert the date string to a date object
+            try:
+                date_object = datetime.strptime(self.started_str, "%a %b %d %H:%M:%S %Y")
+                # Convert the date object to the desired string format
+                formatted_date_string = date_object.strftime("%Y-%m-%d %H:%M:%S")
+                return formatted_date_string
+            except:
+                return None
+        else:
+            return None
+        
+    def f_endtime_str(self):
+        if self.endtime_str:
+            # Convert the date string to a date object
+            try:
+                date_object = datetime.strptime(self.endtime_str, "%a %b %d %H:%M:%S %Y")
+                # Convert the date object to the desired string format
+                formatted_date_string = date_object.strftime("%Y-%m-%d %H:%M:%S")
+                return formatted_date_string
+            except:
+                return None
+        else:
+            return None
+    
+    def __str__(self):
+        return 'NMAP report ' + str(self.id)
+    
     
 class changes(models.Model):
     attribute = models.CharField(max_length=100, blank=True, null=True)
