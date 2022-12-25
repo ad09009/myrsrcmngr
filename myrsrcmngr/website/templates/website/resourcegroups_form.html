@@ -2,38 +2,46 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
-    <div class="card mx-auto d-flex" style="width: 75%;">
-      <div class="card-header bg-secondary">
-          <i class="fas fa-table me-1"></i>
-          New Resource Group
-      </div>
-      <div class="card-body bg-light">
-        <div>
-            <form method="post">
-                {% csrf_token %}
-                {% if form.errors %}
-                <div class="alert alert-danger">
-                    <ul>
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                        <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                    </ul>
-                </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+          <div class="card shadow-lg border-0 rounded-lg mt-5">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                {% if form.instance.pk %}
+                <h3 class="text-center font-weight-light my-4">Edit Group {{ form.instance.name | title }}</h3>
+                {% else %}
+                <h3 class="text-center font-weight-light my-4">New Resource Group</h3>
                 {% endif %}
-                {{ form.name | as_crispy_field }}
-                {{ form.description | as_crispy_field }}
-                {{ form.ips_or_subnet_type | as_crispy_field }}
-                {{ form.ips_or_subnet | as_crispy_field }}
-            <input type="submit" class="btn btn-info" value="Save">
-            <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{% url 'website:groups-list' %}';return false;">
-            </form>
+            </div>
+            <div class="card-body bg-light">
+                <div>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {{ form.name | as_crispy_field }}
+                        {{ form.description | as_crispy_field }}
+                        {{ form.ips_or_subnet_type | as_crispy_field }}
+                        {{ form.ips_or_subnet | as_crispy_field }}
+                    <input type="submit" class="btn btn-info" value="Save">
+                    <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{% url 'website:groups-list' %}';return false;">
+                    </form>
+                </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 </div>
 {% endblock %}

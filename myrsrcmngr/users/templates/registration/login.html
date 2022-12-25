@@ -1,24 +1,29 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-{% if form.errors %}
-<p>Your username and password did not match. Please try again</p>
-{% endif %}
-
-{% if next %}
-{% if user.is_authenticated %}
-  <p>Your account does not have access to this page. To proceed,
-  please login with an account that has access.</p>
-{% else %}
-  <p>Please login to see this page.</p>
-{% endif %}
-{% endif %}
-
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-7">
+              {% if form.errors %}
+              <div class="container">
+                <h3 class="text-center">Your username and password did not match. Please try again!</h3>
+              </div>
+              {% endif %}
+              {% if next %}
+                {% if user.is_authenticated %}
+                <div class="container">
+                  <h3 class="text-center">Your account does not have access to this page. Please login with an account that has access.</h3>
+                </div>
+                {% else %}
+                <div class="container">
+                  <h3 class="text-center">Please log in to see this page.</h3>
+                </div>
+                {% endif %}
+              {% endif %}
                 <div class="card shadow-lg border-0 rounded-lg mt-5">
-                    <div class="card-header"><h3 class="text-center font-weight-light my-4">Login</h3></div>
+                    <div class="card-header">
+                      <h3 class="text-center font-weight-light my-4">Login</h3>
+                    </div>
                     <div class="card-body">
                         <form method="post" action="{% url 'login' %}">
                             {% csrf_token %}
@@ -32,11 +37,11 @@
                                 <td>{{ form.password }}</td>
                               </tr>
                             </table>
-                            <input type="submit" value="login" />
+                            <input type="submit" class="btn btn-info" value="login" />
                           </form>
                     </div>
                     <div class="card-footer text-center py-3">
-                        <div class="small"><a href="{% url 'register' %}">Need an account? Sign up!</a></div>
+                        <div class="small"><a href="{% url 'register' %}">Or click here to register</a></div>
                     </div>
                 </div>
             </div>
