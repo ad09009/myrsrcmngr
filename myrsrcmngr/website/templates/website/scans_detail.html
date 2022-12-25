@@ -43,9 +43,6 @@
                                     <div class="col-6 text-right">{{ scans.formatted_schedule }}</div>
                                 </div>                           
                             </div>
-                            <div class="card-body">
-                                <p class="card-text">Created by <a href="{% url 'users:profile-home' scans.scanAuthor.profile.id %}">{{ scans.scanAuthor }}</a> on {{ scans.create_date | date }}</p>
-                            </div>
                         </div>
                         <div class="tab-pane fade" id="options-tab-pane" role="tabpanel" aria-labelledby="options-tab" tabindex="0">
                             <div class="card-body">
@@ -64,8 +61,7 @@
                         </div>
                     </div>
                     <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white" href="#">View All Info</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        <div class="small text-white">Created by <a class="small text-white" href="{% url 'users:profile-home' scans.scanAuthor.profile.id %}">{{ scans.scanAuthor }}</a> on {{ scans.create_date | date }}</div>
                     </div>
             </div>
         </div>
@@ -130,10 +126,6 @@
                                 </div>
                             </div>  
                         </div>
-                    </div>
-                    <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white" href="#">View All Info</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                     </div>
             </div>
         </div>
