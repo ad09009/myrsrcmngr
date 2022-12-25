@@ -13,6 +13,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseNotAllow
 import os
 from chartjs.views.lines import BaseLineChartView
 import random
+from django.db.models import Q
 
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups, services
@@ -642,10 +643,9 @@ def GlobalSearch(request):
     template_name = 'website/search.html'
     if request.method == 'POST':
         searched = request.POST.get('searched')
-        foundscans = scans.objects.filter(scanName__contains=searched)
-        foundhosts = hosts.objects.filter(main_address__contains=searched)
-        foundresourcegroups = resourcegroups.objects.filter(name__contains=searched)
-        
+        foundscans = scans.objects.filter(scanName__icontains=searched)
+        foundhosts = hosts.objects.filter(Q(main_address__icontains=searched) | Q(name__icontains=searched) | Q(hostnames__icontains=searched) | Q(description__icontains=searched))
+        foundresourcegroups = resourcegroups.objects.filter(Q(name__icontains=searched) | Q(subnet__icontains=searched) | Q(description__icontains=searched))        
         return render(request, template_name, {'searched': searched, 'foundscans':foundscans, 'foundhosts':foundhosts, 'foundresourcegroups':foundresourcegroups})
     else:
         return render(request, template_name, {})
@@ -715,7 +715,9 @@ def hosts_chart(request):
             'scales': {
                 'yAxes': [{
                     'ticks': {
-                        'beginAtZero': True
+                        'stepSize': 1,
+                        'beginAtZero': True,
+                        'maxTicksLimit': 8
                     }
                 }]
             }
@@ -752,7 +754,9 @@ def reports_chart(request):
             'scales': {
                 'yAxes': [{
                     'ticks': {
-                        'beginAtZero': True
+                        'stepSize': 1,
+                        'beginAtZero': True,
+                        'maxTicksLimit': 8
                     }
                 }]
             }
