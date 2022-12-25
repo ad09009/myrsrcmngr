@@ -4,9 +4,12 @@
     * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-sb-admin/blob/master/LICENSE)
     */
     // 
+
+// Changing default font family and font color to mimic Bootstrap
+Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.global.defaultFontColor = '#292b2c';
 // Scripts
 // 
-
 window.addEventListener('DOMContentLoaded', event => {
 
     // Toggle the side navigation

@@ -26,7 +26,7 @@
                     </ul>
                 </div>
                 <div class="tab-content" id="reportlistTabContent">
-                    <div class="tab-pane fade show active" report-url="{% url 'website:reports-totals' %}" id="report-info-tab-pane" role="tabpanel" aria-labelledby="reports-info-tab" tabindex="0">
+                    <div class="tab-pane fade show active" report-url="{% url 'website:reports-totals' %}" id="info-tab-pane" role="tabpanel" aria-labelledby="reports-info-tab" tabindex="0">
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item" id="reportsCreatedTotal">{{totals.total_reports}} total reports created</li>
@@ -48,9 +48,11 @@
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Some other report info
+                    Number of Changes in Reports Over Time per Scan
                 </div>
-                <div class="card-body"></div>
+                <div class="card-body" id="reportchartWrapper" ajax-target="{% url 'website:reports-chart' %}">
+                    <canvas id="reportChart" width="500" height="400"></canvas>
+                </div>
             </div>
         </div>
     </div>

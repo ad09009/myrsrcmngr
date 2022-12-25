@@ -95,8 +95,43 @@ function groupsTableRefresh() {
     }, 3000);
 }
 
-$(document).ready(function(){
+var handle = null;
+function updateGrChartData() {
+    // Make the AJAX request to get the updated data
+    var url = $("#groupChartWrapper").attr("ajax-target");    
+    var chart = $('#groupChart').get(0).getContext('2d').chart;
+    $.ajax({
+      url: url,
+      success: function(data) {
+        // Update the chart with the new data
+        handle.data.labels = data.data.labels;
+        handle.data.datasets[0].data = data.data.datasets[0].data;
+        handle.update();
+      }
+    });
+  }
 
+function createGroupChart() {
+    var url = $("#groupChartWrapper").attr("ajax-target");
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            var ctx = document.getElementById('groupChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'pie',
+                data: data.data,
+                options: data.options,
+            });
+            handle = chart;
+        }
+    });
+    setInterval(updateGrChartData(), 10000);
+}
+
+$(document).ready(function(){
+    createGroupChart();
     groupsTableRefresh();
     groupsTotals();
     setInterval(groupsTotals(), 7000);

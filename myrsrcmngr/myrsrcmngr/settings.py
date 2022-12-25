@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'chartjs',
     'rest_framework',
     'myrsrcmngr',
     'users.apps.UsersConfig',

@@ -52,9 +52,49 @@
       });
 }
 
+var handle = null;
+function updateChartData() {
+    // Make the AJAX request to get the updated data
+    var url = $("#reportchartWrapper").attr("ajax-target");    
+    $.ajax({
+      url: url,
+      success: function(data) {
+        // Update the chart with the new data
+        handle.data.labels = data.data.labels;
+        for (var i = 0; i < handle.data.datasets.length; i++) {
+          handle.data.datasets[i].data = data.data.datasets[i].data;
+        }
+        handle.update();
+      }
+    });
+  }
+
+function createReportChart() {
+    var url = $("#reportchartWrapper").attr("ajax-target");
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+
+            var ctx = document.getElementById('reportChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: data.data,
+                options: data.options,
+            });
+            handle = chart;
+            
+        }
+        
+    });
+    setInterval(updateChartData(), 10000);
+}
+
 
 $(document).ready(function(){
     reportsTotals();
+    createReportChart();
     setInterval(reportsTotals(), 7000);
     reportsTableRefresh();
 

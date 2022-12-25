@@ -11,6 +11,8 @@ from .forms import GroupsForm
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseNotAllowed
 import os
+from chartjs.views.lines import BaseLineChartView
+import random
 
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups, services
@@ -456,6 +458,19 @@ class ResourcegroupDeleteView(GroupOwnerDeleteView):
     
 class ResourcegroupsListView(ListView):
     model = resourcegroups
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the default context data
+        context = super().get_context_data(**kwargs)
+        groups = resourcegroups.objects.all()
+        group_data = []
+        for group in groups:
+            if group.hosts_count() > 0:
+                group_data.append({
+                    'label': group.name,
+                    'value': group.hosts_count()
+                })
+        context['groups'] = group_data
+        return context
     # By convention:
     # template_name = "website/scans_list.html"
 
@@ -637,3 +652,109 @@ def GlobalSearch(request):
 
 class ServiceDetailView(DetailView):
     model = services
+    
+
+#Chart API views
+@api_view(['GET'])
+def groups_piechart(request):
+    if request.method == 'GET':        
+        groupcount = resourcegroups.objects.all().count()
+        color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(groupcount)]
+        data = {
+            'labels': [group.name for group in resourcegroups.objects.all() if group.hosts_count() > 0],
+            'datasets': [{
+                'data': [group.hosts_count() for group in resourcegroups.objects.all() if group.hosts_count() > 0],
+                'backgroundColor': color_codes,
+                'hoverBackgroundColor': [
+                                        'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        'rgba(255, 159, 64, 0.2)'
+                                    ]
+            }]
+        }
+        options = {'responsive': False}
+        return JsonResponse({'data': data, 'options': options})
+    
+@api_view(['GET'])
+def scans_chart(request):
+    groupcount = resourcegroups.objects.all().count()
+    color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(groupcount)]
+    data = {
+    'labels': [group.name for group in resourcegroups.objects.all() if group.scans_count() > 0],
+    'datasets': [{
+      'data': [group.scans_count() for group in resourcegroups.objects.all() if group.scans_count() > 0],
+      'backgroundColor': color_codes,
+      'hoverBackgroundColor': ['#FF6384', '#36A2EB', '#FFCE56']
+    }]
+    }
+    options = {'responsive': False}
+    return JsonResponse({'data': data, 'options': options})
+
+@api_view(['GET'])
+def hosts_chart(request):
+    if request.method == 'GET':        
+        allhosts = hosts.objects.all().filter(status='up')
+        hostcount = allhosts.count()
+        color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(hostcount)]
+        data = {
+            'labels': [host.main_address for host in allhosts if host.num_open_ports() > 0],
+            'datasets': [{
+                'data': [host.num_open_ports() for host in allhosts if host.num_open_ports() > 0],
+                'backgroundColor': color_codes,
+                'borderWidth': 2
+            }]
+        }
+        options = {
+            'responsive': False,
+            'legend': {
+            'display': False
+                    },
+            'scales': {
+                'yAxes': [{
+                    'ticks': {
+                        'beginAtZero': True
+                    }
+                }]
+            }
+        }
+        return JsonResponse({'data': data, 'options': options})
+
+@api_view(['GET'])
+def reports_chart(request):
+    if request.method == 'GET':
+        #Number of changes in report over time per scan
+        color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(scans.objects.all().count())]
+        datasets = []
+        for scan in scans.objects.all():
+            reps = scan.reports_set.all().filter(parse_success=True)
+            if reps:
+                dataset = {
+                    'label': scan.scanName,
+                    'data': [rep.changes_count() for rep in reps if rep.changes_count() > 0],
+                        'backgroundColor': color_codes.pop(0),
+                        'fill': False,
+                        'borderColor': color_codes.pop(0), 
+                        'borderWidth': 1,
+                        'pointRadius': 3,
+                        'pointHoverRadius': 5, 
+                }
+                datasets.append(dataset)
+        allreports = reports.objects.all().filter(parse_success=True)
+        data = {
+            'labels': [report.f_started_str() for report in allreports if report.changes_count() > 0],
+            'datasets': datasets
+        }
+        options = {
+            'responsive': False,
+            'scales': {
+                'yAxes': [{
+                    'ticks': {
+                        'beginAtZero': True
+                    }
+                }]
+            }
+        }
+        return JsonResponse({'data': data, 'options': options})

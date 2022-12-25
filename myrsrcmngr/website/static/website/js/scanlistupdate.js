@@ -81,7 +81,6 @@ function scansTableRefresh() {
               data: 'Fresourcegroup',
               title: 'Group',
               render: function(data, type, row, meta) {
-                console.log(row.id, row.started_str, row.endtime_str, row.elapsed, row.num_services, row.hosts_up, row.hosts_down, row.hosts_total)
                 return '<a href=' + '/groups/' + row.resourcegroup_id + '>'+row.Fresourcegroup+'</a>';
               }
             },
@@ -98,9 +97,88 @@ function scansTableRefresh() {
         table.ajax.reload();
     }, 3000);
 }
+var handle = null;
+function updateChartData() {
+    // Make the AJAX request to get the updated data
+    var url = $("#scanchart").attr("ajax-target");    
+    $.ajax({
+      url: url,
+      success: function(data) {
+        // Update the chart with the new data
+        handle.data.labels = data.data.labels;
+        handle.data.datasets[0].data = data.data.datasets[0].data;
+        handle.update();
+      }
+    });
+  }
+
+function createChart() {
+    var url = $("#scanchart").attr("ajax-target");
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+
+            var ctx = document.getElementById('my-chart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Scans Created', 'Scans Active', 'Scans Running'],
+                    datasets: [{
+                        label: 'Scans',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+            
+        }
+    });
+}
+
+function createScanChart() {
+    var url = $("#scanchart").attr("ajax-target");
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            var ctx = document.getElementById('my-chart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'pie',
+                data: data.data,
+                options: data.options,
+            });
+            handle = chart;
+        }
+    });
+    setInterval(updateChartData(), 10000);
+}
+
 
 $(document).ready(function(){
-
+    createScanChart();
     scansTableRefresh();
     scansTotals();
     setInterval(scansTotals, 7000);

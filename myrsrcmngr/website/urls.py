@@ -66,4 +66,10 @@ urlpatterns = [
     
     #Scans list JSON response
     path('scans/json/', views.scans_list),
+    
+    #Chart refresh API
+    path('groups/api/chart/', views.groups_piechart, name='groups-chart'),
+    path('scans/api/chart/', views.scans_chart, name='scans-chart'),
+    path('hosts/api/chart/', views.hosts_chart, name='hosts-chart'),
+    path('reports/api/chart/', views.reports_chart, name='reports-chart'),
 ]

@@ -48,9 +48,11 @@
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Some other scan info
+                    Scans per Group
                 </div>
-                <div class="card-body"></div>
+                <div class="card-body" id="scanchart" ajax-target="{% url 'website:scans-chart' %}">
+                    <canvas id="my-chart" width="250" height="200"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -106,4 +108,5 @@
 
 {% block js %}
 <script src="{% static 'website/js/scanlistupdate.js' %}"></script>
+
 {% endblock js %}

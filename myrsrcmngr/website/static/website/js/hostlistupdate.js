@@ -50,15 +50,53 @@
         dataType: 'json',
         success: function(data) {
           // Update the stats in the scan list view
-          $('#hostsCreatedTotal').text(data.totals.total_hosts + ' hosts TOTAL');
-          $('#hostsUpTotal').text(data.totals.total_hosts_up + ' hosts UP');
-          $('#hostsDownTotal').text(data.totals.total_hosts_down + ' hosts DOWN');
+          $('#hostsCreatedTotal').text(data.data.total_hosts + ' hosts TOTAL');
+          $('#hostsUpTotal').text(data.data.total_hosts_up + ' hosts UP');
+          $('#hostsDownTotal').text(data.data.total_hosts_down + ' hosts DOWN');
         }
       });
 }
 
+var handle = null;
+function updateChartData() {
+    // Make the AJAX request to get the updated data
+    var url = $("#hostchartWrapper").attr("ajax-target");    
+    $.ajax({
+      url: url,
+      success: function(data) {
+        // Update the chart with the new data
+        handle.data.labels = data.data.labels;
+        handle.data.datasets[0].data = data.data.datasets[0].data;
+        handle.update();
+      }
+    });
+  }
+
+function createHostChart() {
+    var url = $("#hostchartWrapper").attr("ajax-target");
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+
+            var ctx = document.getElementById('hostChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: data.data,
+                options: data.options,
+            });
+            handle = chart;
+            
+        }
+        
+    });
+    setInterval(updateChartData(), 10000);
+}
+
 
 $(document).ready(function(){
+    createHostChart();
     hostsTotals();
     setInterval(hostsTotals(), 7000);
     hostsTableRefresh();

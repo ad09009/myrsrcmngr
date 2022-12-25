@@ -48,9 +48,11 @@
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Some other group info
+                    Host per Group
                 </div>
-                <div class="card-body"></div>
+                <div class="card-body" id="groupChartWrapper" ajax-target="{% url 'website:groups-chart' %}">
+                    <canvas id="groupChart" width="400" height="225"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -103,4 +105,5 @@
 
 {% block js %}
 <script src="{% static 'website/js/grouplistupdate.js' %}"></script>
+
 {% endblock js %}
