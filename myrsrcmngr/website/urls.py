@@ -11,7 +11,7 @@ urlpatterns = [
     path('scans/create', views.ScanCreateView.as_view(), name='new-scan'),
     path('scans/<int:pk>', views.ScanDetailView.as_view(), name='scan-detail'),
     path('scans/<int:pk>/edit', views.ScanUpdateView.as_view(), name='edit-scan'),
-    path('scans/<int:pk>/delete', views.ScanDeleteView.as_view(success_url=reverse_lazy('website:index')), name='delete-scan'),
+    path('scans/<int:pk>/delete', views.ScanDeleteView.as_view(success_url=reverse_lazy('website:scans-list')), name='delete-scan'),
     
     #Scans API for AJAX calls
     path('scans/api/<int:pk>/', views.ScanProgressView.as_view(), name='scan-progress'),
@@ -25,7 +25,7 @@ urlpatterns = [
     path('groups/create', views.ResourcegroupCreateView.as_view(), name='new-group'),
     path('groups/<int:pk>/', views.ResourcegroupDetailView.as_view(), name='groups-detail'),
     path('groups/<int:pk>/edit', views.ResourcegroupUpdateView.as_view(), name='edit-group'),
-    path('groups/<int:pk>/delete', views.ResourcegroupDeleteView.as_view(success_url=reverse_lazy('website:index')), name='delete-group'),
+    path('groups/<int:pk>/delete', views.ResourcegroupDeleteView.as_view(success_url=reverse_lazy('website:groups-list')), name='delete-group'),
     
     #Resource groups API for AJAX calls
     path('groups/api/refresh/groups/', views.grouplist_refresh, name='groups-refresh'),

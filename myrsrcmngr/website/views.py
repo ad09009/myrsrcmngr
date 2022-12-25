@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer, HostsSerializer, ServicesSerializer
 from rest_framework.decorators import api_view
-from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView
+from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView, HostOwnerUpdateView
 from .forms import GroupsForm
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseNotAllowed
@@ -349,7 +349,7 @@ class HostCreateView(OwnerCreateView):
     # By convention:
     # template_name = "website/hosts_form.html"
 
-class HostUpdateView(OwnerUpdateView):
+class HostUpdateView(HostOwnerUpdateView):
     model = hosts
     fields = ['name', 'description']
     # By convention:

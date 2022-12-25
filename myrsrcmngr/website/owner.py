@@ -17,7 +17,12 @@ class OwnerCreateView(LoginRequiredMixin, CreateView):
     
     def get_success_url(self):
            pk = self.object.id
-           return reverse_lazy("website:index")
+           return reverse_lazy("website:scans-list")
+       
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('website:scans-list')
+        return context
 
 
 class OwnerUpdateView(LoginRequiredMixin, UpdateView):
@@ -31,7 +36,28 @@ class OwnerUpdateView(LoginRequiredMixin, UpdateView):
         if self.request.user.is_superuser:
             return qs
         return qs.filter(scanAuthor=self.request.user) # limit to only modifying their own stuff
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('website:scan-detail', kwargs={'pk': self.kwargs['pk']})
+        return context
 
+class HostOwnerUpdateView(LoginRequiredMixin, UpdateView):
+
+    def get_success_url(self):
+           pk = self.kwargs["pk"]
+           return reverse_lazy("website:hosts-detail", kwargs={"pk": pk})
+
+    def get_queryset(self):
+        qs = super(HostOwnerUpdateView, self).get_queryset()
+        if self.request.user.is_superuser:
+            return qs
+        return qs.filter(resourcegroup__user=self.request.user) # limit to only modifying their own stuff
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('website:hosts-detail', kwargs={'pk': self.kwargs['pk']})
+        return context
 
 class OwnerDeleteView(LoginRequiredMixin, DeleteView):
 
@@ -53,6 +79,12 @@ class GroupOwnerCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
            pk = self.object.id
            return reverse_lazy("website:groups-list")
+       
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('website:groups-list')
+        return context
+
     
 class GroupOwnerUpdateView(LoginRequiredMixin, UpdateView):
 
@@ -65,6 +97,11 @@ class GroupOwnerUpdateView(LoginRequiredMixin, UpdateView):
         if self.request.user.is_superuser:
             return qs
         return qs.filter(user=self.request.user) # limit to only modifying their own stuff
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('website:groups-detail', kwargs={'pk': self.kwargs['pk']})
+        return context
 
 
 class GroupOwnerDeleteView(LoginRequiredMixin, DeleteView):

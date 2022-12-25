@@ -16,7 +16,7 @@
               {{ form|crispy }}
               <div></div>
               <input type="submit" class="btn btn-info" value="Save">
-              <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{% url 'website:index' %}';return false;">
+              <input type="submit" class="btn btn-secondary" value="Cancel" onclick="window.location.href='{{ cancel_url }}';return false;">
             </form>
           </div>
         </div>
