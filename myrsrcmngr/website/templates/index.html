@@ -4,28 +4,34 @@
     <div class="container-fluid px-4">
         <h1 class="mt-4">Dashboard</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item active">A live overview of notable changes</li>
+            <li class="breadcrumb-item active">An overview of notable changes</li>
         </ol>
         <div class="row">
-            <div class="col-xl-4 col-md-4">
-                <div class="card bg-primary text-white mb-4">
+            <div class="col-xl-4 col-md-4 d-flex">
+                <div class="card bg-primary text-white mb-4 flex-fill">
                     <div class="card-body">
-                        <div class="card-body">
+                        <div class="card-body text-center">
                             <h6>Active Scans</h6>
                         </div>
                         {% if activescans %}
+                        <div class="row mx-auto text-center border">
+                            <div class="col-4 text-left border">Scan</div>
+                            <div class="col-4 text-center border">Group</div>
+                            <div class="col-4 text-right border">Status</div>
+                        </div>
                         {% for scan in activescans %}
-                        <div class="row mx-auto text-center">
-                            <div class="col-6">Scan: <a class="small text-white" href="{% url 'website:scan-detail' scan.id %}">{{ scan.scanName }}</a></div>
-                            <div class="col-6 text-right">in group <a class="small text-white" href="{% url 'website:groups-detail' scan.resourcegroup.id %}">{{ scan.resourcegroup }}</a></div>
-
+                        
+                        <div class="row mx-auto">
+                            <div class="col-4 text-left border"><a class="small text-white" href="{% url 'website:scan-detail' scan.id %}">{{ scan.scanName }}</a></div>
+                            <div class="col-4 text-center border"><a class="small text-white" href="{% url 'website:groups-detail' scan.resourcegroup.id %}">{{ scan.resourcegroup }}</a></div>
+                            <div class="col-4 text-right border">{{ scan.formatted_status }}</div>
+                        </div>
                         {% endfor %}
                         {% else %}
                         <div class="row mx-auto text-center">
-                            <div class="col-6 ">No Active Scans</div>
+                            <div class="col-12 ">No Active Scans</div>
                         </div>
                         {% endif %}
-                    </div>
                     </div>
                     <div class="card-footer d-flex align-items-center justify-content-between">
                         <a class="small text-white" href="{% url 'website:scans-list' %}">View Scans</a>
@@ -81,8 +87,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-md-4">
-                <div class="card mb-4">
+            <div class="col-xl-4 col-md-4 d-flex">
+                <div class="card mb-4 flex-fill">
                     <div class="card-header">
                         <i class="fas fa-chart-bar me-1"></i>
                         Hosts UP per Group
@@ -99,14 +105,14 @@
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-table me-1"></i>
-                Recent Changes in Reports
+                Recent Changes
             </div>
             <div class="card-body">
             {% if con %}
                 <table id="datatablesSimple" class="table">
                     <thead>
                         <tr>
-                            <th>Ended at</th>
+                            <th>Observed at</th>
                             <th>Parameters</th>
                             <th>Hosts Up</th>
                             <th>Hosts Down</th>
@@ -117,7 +123,7 @@
                     </thead>
                     <tfoot>
                         <tr>
-                            <th>Ended at</th>
+                            <th>Observed at</th>
                             <th>Parameters</th>
                             <th>Hosts Up</th>
                             <th>Hosts Down</th>
@@ -133,12 +139,12 @@
                             <td><a href="{% url 'website:scan-detail' value.report.scan.id %}">{{ value.report.full_cmndline }}</a></td>
                             {% if value.changes and value.report_changes %}
                                 {% if value.report_changes.hosts_up %}
-                                <td>{{ value.report.hosts_up }} (<a href="#">{{value.report_changes.hosts_up}}</a>)</td>
+                                <td>{{ value.report.hosts_up }} ({{value.report_changes.hosts_up}})</td>
                                 {% else %}
                                 <td>{{ value.report.hosts_up }}</td>
                                 {% endif %}
                                 {% if value.report_changes.hosts_down %}
-                                <td>{{ value.report.hosts_down }} (<a href="#">{{value.report_changes.hosts_down}}</a>)</td>
+                                <td>{{ value.report.hosts_down }} ({{value.report_changes.hosts_down}})</td>
                                 {% else %}
                                 <td>{{ value.report.hosts_down }}</td>
                                 {% endif %}
