@@ -6,6 +6,11 @@ urlpatterns = [
     #Dashboard
     path('', views.dashboard, name='index'),
     
+    #Dashboard API for AJAX calls
+    path('dashboard/api/dismissed/', views.dashboard_dismiss, name='dashboard-dismiss'),
+    path('dashboard/api/changes/', views.dashboard_changes, name='dashboard-changes'),
+    path('changes/', views.dashboard_changes_table, name='changes-only'),
+    
     #Scans CRUD
     path('scans/', views.ScansListView.as_view(), name='scans-list'),
     path('scans/create', views.ScanCreateView.as_view(), name='new-scan'),
@@ -72,4 +77,5 @@ urlpatterns = [
     path('scans/api/chart/', views.scans_chart, name='scans-chart'),
     path('hosts/api/chart/', views.hosts_chart, name='hosts-chart'),
     path('reports/api/chart/', views.reports_chart, name='reports-chart'),
+    path('dashboard/api/chart/', views.dashboard_chart, name='dashboard-chart'),
 ]

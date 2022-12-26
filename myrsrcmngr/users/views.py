@@ -44,7 +44,7 @@ def logout_view(request):
 class ProfileDetailView(OwnerDetailView):
     model = Profile
     fields = '__all__'
-   
+    
     # By convention:
     # template_name = "users/profile_detail.html"
 

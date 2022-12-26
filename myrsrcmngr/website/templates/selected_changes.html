@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid px-4">
+    <h2 class="d-inline-block my-auto mt-4">Changes</h2>
+    <div class="row">
+        <div class="col-xl-10 col-md-10">
+            <div class="card  mb-4">
+                <div class="card-header">Overview of {{changes.total}} Changes
+                </div>
+
+                            <div class="card-body">
+                                {% if changes.changes %}
+                                <table id="datatablesSimpleChanges" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Host Address</th>
+                                            <th>Group</th>
+                                            <th>Attribute</th>
+                                            <th>Change</th>
+                                            <th>Report</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Host Address</th>
+                                            <th>Group</th>
+                                            <th>Attribute</th>
+                                            <th>Change</th>
+                                            <th>Report</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                    {% for change in changes.changes %}
+                                        <tr>
+                                            <td><a href="{% url 'website:hosts-detail' change.host_id %}">{{ change.main_address }}</a></td>
+                                            <td><a href="{% url 'website:groups-detail' change.group_id %}">{{ change.group_name }}</a></td>
+                                            <td>{{ change.attribute }}</td>
+                                            <td>{{ change.new_value }}</td>
+                                            <td><a href="{% url 'website:report-detail' change.report_id %}">NMAP Report {{ change.report_id }}</a></td>
+                                            <td>{{ change.report_date }}</td>
+                                        </tr>
+                                    {% endfor %}
+                    
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                <div class="card-body">    
+                                  <p>'There are no changes here to display' </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{% static 'website/js/changes.js' %}"></script>
+{% endblock %}

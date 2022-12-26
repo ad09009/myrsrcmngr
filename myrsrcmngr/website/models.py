@@ -354,6 +354,7 @@ class changes(models.Model):
     host = models.ForeignKey(hosts, blank=True, null=True, on_delete=models.SET_NULL)
     service = models.ForeignKey(services, blank=True, null=True, on_delete=models.SET_NULL)
     prev_rep = models.IntegerField(blank=True, null=True)
+    dismissed = models.BooleanField(default=False)
 
 class services_added_removed(models.Model):
     status = models.CharField(max_length=20)

@@ -136,6 +136,7 @@
                         </div>
                         <div class="tab-pane fade" id="host-stats-tab-pane" role="tabpanel" aria-labelledby="host-stats-tab" tabindex="0">
                             <div class="card-body">
+                                {% if hosts.status == 'up' %}
                                 <div class="card-body" id="hostservicechanges" data-ajax-target="{% url 'website:host-changes' hosts.id %}">
                                     <div class="row">
                                         <div class="col-6">Total Services (not closed):</div>
@@ -150,6 +151,15 @@
                                         <div class="col-6 text-right" id="hostOpenPortsStr">{{hosts.str_open_ports}}</div>
                                     </div>              
                                 </div>
+                                {% else %}
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">Host is DOWN</div>
+                                        <div class="col-6 text-right" id="hostServices">No Current Service Info Available</div>
+                                    </div>
+
+                                </div>
+                                {% endif %}
                             </div>  
                         </div>
                     </div>

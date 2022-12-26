@@ -16,7 +16,7 @@ import random
 from django.db.models import Q
 
 # Create your views here.
-from .models import scans, hosts, reports, resourcegroups, services
+from .models import scans, hosts, reports, resourcegroups, services, changes
 
 def index(request):
     con = {}
@@ -34,6 +34,116 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+def dashboard_changes_table(request):
+    if request.method == 'GET':
+        eachchanges = {}
+        allchanges = []
+        mainchanges = {'total': 0,
+                        'changes': [{
+                                    'main_address':'',
+                                    'group_name':'',
+                                    'group_id':0,
+                                    'host_id':0,
+                                    'report_date':'',
+                                    'report_id':0,
+                                    'attribute': '',
+                                    'new_value': '',
+                                    },
+                                ]
+                    }        
+        #In order to relieve some data amount concerns, select just the last 100 successful reports
+        reports_list = reports.objects.all().filter(parse_success=True).order_by('-id')[:100]
+
+        #for each report, find the notable changes (status, state, os_fingerprint) that have not been dismissed, and are not the elapsed time
+        #Further filter down for those changes that have host indicated
+        filteredChanges = changes.objects.filter(cur_report__in=reports_list)
+        filteredChanges = filteredChanges.exclude(dismissed=True).exclude(attribute='elapsed').exclude(host=None)
+        filteredChanges = filteredChanges.filter(Q(attribute='status') | Q(attribute='state') | Q(attribute='os_fingerprint'))
+        for change in filteredChanges:
+            host = change.host
+            group = host.resourcegroup
+            eachchanges['main_address'] = host.main_address
+            eachchanges['group_name'] = group.name
+            eachchanges['group_id'] = group.id
+            eachchanges['host_id'] = host.id
+            eachchanges['report_date'] = change.cur_report.f_endtime_str()
+            eachchanges['report_id'] = change.cur_report.id
+            eachchanges['attribute'] = change.attribute
+            if change.attribute == 'state' and change.cur_val == 'open':
+                eachchanges['new_value'] = change.service.name_conc
+            elif change.attribute == 'state':
+                eachchanges = {}
+                continue
+            else:
+                eachchanges['new_value'] = change.cur_val
+            allchanges.append(eachchanges)
+            eachchanges = {}
+        mainchanges['total'] = len(allchanges)
+        mainchanges['changes'] = allchanges
+        return render(request, 'selected_changes.html', {'changes':mainchanges})
+
+@api_view(['POST'])
+def dashboard_dismiss(request):
+    if request.method == 'POST':
+        # get the last 100 reports
+        last_100_reports = reports.objects.all().order_by('-id')[:100]
+        # get all changes that relate to the last 100 reports
+        filteredchanges = changes.objects.filter(cur_report__in=last_100_reports)
+        # set the 'dismissed' attribute to True for all changes
+        filteredchanges.update(dismissed=True)
+        # return a JSON response indicating that the changes have been dismissed
+        return JsonResponse({'dismissed': True})
+
+@api_view(['GET'])
+def dashboard_changes(request):
+    if request.method == 'GET':
+        eachchanges = {}
+        allchanges = []
+        mainchanges = {'total': 0,
+                        'changes': [{
+                                    'main_address':'',
+                                    'group_name':'',
+                                    'group_id':0,
+                                    'host_id':0,
+                                    'report_date':'',
+                                    'report_id':0,
+                                    'attribute': '',
+                                    'new_value': '',
+                                    },
+                                ]
+                    }        
+        #In order to relieve some data amount concerns, select just the last 100 successful reports
+        reports_list = reports.objects.all().filter(parse_success=True).order_by('-id')[:100]
+
+        #for each report, find the notable changes (status, state, os_fingerprint) that have not been dismissed, and are not the elapsed time
+        #Further filter down for those changes that have host indicated
+        filteredChanges = changes.objects.filter(cur_report__in=reports_list)
+        filteredChanges = filteredChanges.exclude(dismissed=True).exclude(attribute='elapsed').exclude(host=None)
+        filteredChanges = filteredChanges.filter(Q(attribute='status') | Q(attribute='state') | Q(attribute='os_fingerprint'))
+        for change in filteredChanges:
+            host = change.host
+            group = host.resourcegroup
+            eachchanges['main_address'] = host.main_address
+            eachchanges['group_name'] = group.name
+            eachchanges['group_id'] = group.id
+            eachchanges['host_id'] = host.id
+            eachchanges['report_date'] = change.cur_report.f_endtime_str()
+            eachchanges['report_id'] = change.cur_report.id
+            eachchanges['attribute'] = change.attribute
+            if change.attribute == 'state' and change.cur_val == 'open':
+                eachchanges['new_value'] = change.service.name_conc
+            elif change.attribute == 'state':
+                eachchanges = {}
+                continue
+            else:
+                eachchanges['new_value'] = change.cur_val
+            allchanges.append(eachchanges)
+            eachchanges = {}
+        mainchanges['total'] = len(allchanges)
+        mainchanges['changes'] = allchanges
+        return JsonResponse({"data":mainchanges})
+
+
 def dashboard(request):
     con = {}
     rreport = None
@@ -49,9 +159,7 @@ def dashboard(request):
             changes_count = rchanges.count()
             print(changes_count)
             if rchanges:
-                print('here')
                 report_changes['hosts_changed'] = 0
-                print('here2')
                 report_changes['hosts_added'] = 0
                 report_changes['hosts_removed'] = 0
                 report_changes['services_changed'] = 0
@@ -61,7 +169,6 @@ def dashboard(request):
                 report_changes['hosts_down'] = None
                 report_changes['hosts_total'] = None
                 counter = 0
-                print('rchanges')
                 for change in rchanges:
                     print(change)
                     print(counter)
@@ -69,39 +176,28 @@ def dashboard(request):
                     if change.attribute == 'hosts_up':
                         print('hosts_up', change.cur_val, change.prev_val)
                         if change.prev_val is None:
-                            print('prev_val is None')
                             change.prev_val = 0
                         report_changes['hosts_up'] = int(change.cur_val) - int(change.prev_val)
-                        print('after hosts up')
                     elif change.attribute == 'hosts_down':
-                        print('hosts_down')
                         if change.prev_val is None:
                             change.prev_val = 0
                         report_changes['hosts_down'] = int(change.cur_val) - int(change.prev_val)
                     elif change.attribute == 'hosts_total':
-                        print('hosts_total')
                         if change.prev_val is None:
                             change.prev_val = 0
                         report_changes['hosts_total'] = int(change.cur_val) - int(change.prev_val)
                     elif change.status == 'CHANGED' and change.host is not None and change.service is None:
-                        print('hosts_changed')
                         report_changes['hosts_changed'] = report_changes['hosts_changed'] + 1
                     elif change.status == 'ADDED' and change.host is not None and change.service is not None:
-                        print('services_added')
                         report_changes['services_added'] = report_changes['services_added'] + 1
                     elif change.status == 'CHANGED' and change.host is not None and change.service is not None:
-                        print('services_changed')
                         report_changes['services_changed'] = report_changes['services_changed'] + 1
                     elif change.status == 'REMOVED' and change.host is not None and change.service is not None:
-                        print('services_removed')
                         report_changes['services_removed'] = report_changes['services_removed'] + 1
                     elif change.status == 'REMOVED' and change.host is not None and change.service is None:
-                        print('hosts_removed')
                         report_changes['hosts_removed'] = report_changes['hosts_removed'] + 1
                     elif change.status == 'ADDED' and change.host is not None and change.service is None:
-                        print('hosts_added')
                         report_changes['hosts_added'] = report_changes['hosts_added'] + 1
-            print('report_changes')
             con[groupname] = {
                 'report':rreport,
                 'report_changes': report_changes,
@@ -114,9 +210,56 @@ def dashboard(request):
     context = {
         'con': con
     }
-    for key, value in context['con'].items():
-        print(key, value)
-    print('something')
+    
+    eachchanges = {}
+    allchanges = []
+    mainchanges = {'total': 0,
+                    'changes': [{
+                                'main_address':'',
+                                'group_name':'',
+                                'group_id':0,
+                                'host_id':0,
+                                'report_date':'',
+                                'report_id':0,
+                                'attribute': '',
+                                'new_value': '',
+                                },
+                            ]
+                }        
+    #In order to relieve some data amount concerns, select just the last 100 successful reports
+    reports_list = reports.objects.all().filter(parse_success=True).order_by('-id')[:100]
+
+    #for each report, find the notable changes (status, state, os_fingerprint) that have not been dismissed, and are not the elapsed time
+    #Further filter down for those changes that have host indicated
+    filteredChanges = changes.objects.filter(cur_report__in=reports_list)
+    filteredChanges = filteredChanges.exclude(dismissed=True).exclude(attribute='elapsed').exclude(host=None)
+    filteredChanges = filteredChanges.filter(Q(attribute='status') | Q(attribute='state') | Q(attribute='os_fingerprint'))
+    for change in filteredChanges:
+        host = change.host
+        group = host.resourcegroup
+        eachchanges['main_address'] = host.main_address
+        eachchanges['group_name'] = group.name
+        eachchanges['group_id'] = group.id
+        eachchanges['host_id'] = host.id
+        eachchanges['report_date'] = change.cur_report.f_endtime_str()
+        eachchanges['report_id'] = change.cur_report.id
+        eachchanges['attribute'] = change.attribute
+        if change.attribute == 'state' and change.cur_val == 'open':
+            eachchanges['new_value'] = change.service.name_conc
+        elif change.attribute == 'state':
+            eachchanges = {}
+            continue
+        else:
+            eachchanges['new_value'] = change.cur_val
+        allchanges.append(eachchanges)
+        eachchanges = {}
+    mainchanges['total'] = len(allchanges)
+    mainchanges['changes'] = allchanges
+    context['changes'] = mainchanges
+    
+    activescans = scans.objects.all().filter(active=True)[:5]
+    context['activescans'] = activescans
+    
     return render(request, 'index.html', context)
 
 #CRUD views for Scans
@@ -751,6 +894,38 @@ def reports_chart(request):
         }
         options = {
             'responsive': False,
+            'scales': {
+                'yAxes': [{
+                    'ticks': {
+                        'stepSize': 1,
+                        'beginAtZero': True,
+                        'maxTicksLimit': 8
+                    }
+                }]
+            }
+        }
+        return JsonResponse({'data': data, 'options': options})
+
+@api_view(['GET'])
+def dashboard_chart(request):
+    if request.method == 'GET':
+        colors = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D', '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A']        
+        colors_with_opacity = ['rgba(255, 102, 51, 0.6)', 'rgba(255, 179, 153, 0.6)', 'rgba(255, 51, 255, 0.6)','rgba(255, 255, 153, 0.6)', 'rgba(0, 179, 230, 0.6)', 'rgba(230, 179, 51, 0.6)', 'rgba(51, 102, 230, 0.6)', 'rgba(153, 153, 102, 0.6)', 'rgba(153, 255, 153, 0.6)','rgba(179, 77, 77, 0.6)', 'rgba(128, 179, 0, 0.6)', 'rgba(128, 153, 0, 0.6)','rgba(230, 179, 179, 0.6)', 'rgba(102, 128, 179, 0.6)', 'rgba(102, 153, 26, 0.6)']
+        allreps = resourcegroups.objects.all()
+        data = {
+            'labels': [host.name for host in allreps if host.hostsup_count() > 0],
+            'datasets': [{
+                'data': [host.hostsup_count() for host in allreps if host.hostsup_count() > 0],
+                'backgroundColor': colors,
+                'hoverBackgroundColor': colors_with_opacity,
+                'borderWidth': 2
+            }]
+        }
+        options = {
+            'responsive': True,
+            'legend': {
+            'display': False
+                    },
             'scales': {
                 'yAxes': [{
                     'ticks': {
