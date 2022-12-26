@@ -49,7 +49,7 @@ function itemTemplate(type, title, active, host, host_id, group, group_id, value
         </div> 
         <div class="row">
             <div class="col-6">Group: </div>
-            <div class="col-6 text-right"><a href="/hosts/${group_id}">${group}</a></div>
+            <div class="col-6 text-right"><a href="/groups/${group_id}">${group}</a></div>
         </div> 
         <div class="row">
             <div class="col-6">Change: </div>
@@ -57,7 +57,7 @@ function itemTemplate(type, title, active, host, host_id, group, group_id, value
         </div> 
         <div class="row">
             <div class="col-6">Report: </div>
-            <div class="col-6 text-right"><a href="/hosts/${report_id}">${report_date}</a></div>
+            <div class="col-6 text-right"><a href="/reports/${report_id}">${report_date}</a></div>
         </div> 
         </div>
         </div>` ;
