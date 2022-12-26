@@ -8,25 +8,32 @@
         </ol>
         <div class="row">
             <div class="col-xl-4 col-md-4 d-flex">
-                <div class="card bg-primary text-white mb-4 flex-fill">
-                    <div class="card-body">
-                        <div class="card-body text-center">
-                            <h6>Active Scans</h6>
-                        </div>
+                <div class="card mb-4 flex-fill">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        Active Scans
+                    </div>
+                    <div class="card-body" id="dashInfo">
                         {% if activescans %}
-                        <div class="row mx-auto text-center border">
-                            <div class="col-4 text-left border">Scan</div>
-                            <div class="col-4 text-center border">Group</div>
-                            <div class="col-4 text-right border">Status</div>
-                        </div>
-                        {% for scan in activescans %}
-                        
-                        <div class="row mx-auto">
-                            <div class="col-4 text-left border"><a class="small text-white" href="{% url 'website:scan-detail' scan.id %}">{{ scan.scanName }}</a></div>
-                            <div class="col-4 text-center border"><a class="small text-white" href="{% url 'website:groups-detail' scan.resourcegroup.id %}">{{ scan.resourcegroup }}</a></div>
-                            <div class="col-4 text-right border">{{ scan.formatted_status }}</div>
-                        </div>
-                        {% endfor %}
+                        <table id="datatablesSimpleDashScans" class="table" report-url="{% url 'website:dashboard-scans' %}">
+                            <thead>
+                                <tr>
+                                    <th>Scan</th>
+                                    <th>Group</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for scan in activescans %}
+                                <tr>
+                                    <td><a class="small" href="{% url 'website:scan-detail' scan.id %}">{{ scan.scanName }}</a></td>
+                                    <td><a class="small" href="{% url 'website:groups-detail' scan.resourcegroup.id %}">{{ scan.resourcegroup }}</a></td>
+                                    <td><h6 class="small">{{ scan.formatted_status }}</h6></td>
+                                </tr>
+                            {% endfor %}
+            
+                                </tbody>
+                            </table>
                         {% else %}
                         <div class="row mx-auto text-center">
                             <div class="col-12 ">No Active Scans</div>
@@ -81,9 +88,9 @@
                           </div>                        
                     </div>
                     <div class="card-footer d-flex align-items-center justify-content-between">
-                        <button id="dashboardDismiss" scan-ajax-target="{% url 'website:dashboard-dismiss' %}" value="0" class="btn btn-danger d-inline-block my-auto">Dismiss All</button>
+                        <button id="dashboardDismiss" scan-ajax-target="{% url 'website:dashboard-dismiss' %}" value="0" class="btn btn-danger d-inline-block my-auto" disabled>Dismiss All</button>
                         <input type="hidden" id="active" value="{% if changes %}0{% else %}1{% endif %}">
-                        <a id="allChanges" href="{% url 'website:changes-only' %}" class="btn btn-primary d-inline-block my-auto">View All {{changes.totals}} Changes</a>
+                        <a id="allChanges" href="{% url 'website:changes-only' %}" class="btn btn-primary d-inline-block my-auto" disabled>View All {{changes.totals}} Changes</a>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-from .jobs import scan_call, parse_call
+from .jobs import scan_call
 
 def start():
     scheduler = BackgroundScheduler()

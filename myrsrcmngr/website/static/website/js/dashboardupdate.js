@@ -98,7 +98,8 @@ function updateChangesCarousel(data) {
         $('#innerC').empty();
         console.log("data length > 0", data.length);
         $('#allChanges').text('View All '+ totals +' Changes');
-        $('#allChanges').prop('disabled', false);
+        $('#allChanges').removeClass('disabled');
+        $('#allChanges').prop('href', '/changes/');
         for (let i = 0; i < data.length; i++) {
             let change = data[i];
             let newItem = createItem(change, i);
@@ -108,7 +109,9 @@ function updateChangesCarousel(data) {
         $('#changes-carousel').carousel('refresh');
     }
     else{
-        $('#allChanges').prop('disabled', true);
+        $('#dashboardDismiss').prop('disabled', true);
+        $('#allChanges').addClass('disabled');
+        $('#allChanges').prop('href', '#');
     }
   }
 
@@ -147,7 +150,8 @@ function dismissChanges() {
               // update the carousel to show "No new changes"
               $('#innerC').empty();
               $('#allChanges').text('View All 0 Changes');
-              $('#allChanges').prop('disabled', true);
+              $('#allChanges').addClass('disabled');
+              $('#allChanges').prop('href', '#');
               $('#innerC').append(itemTemplate(0));
                 $('#changes-carousel').carousel('refresh');
               $("#active").val("1");
@@ -209,11 +213,44 @@ function createDashboardChart() {
     setInterval(updateChartData(), 20000);
 }
 
-
-
-
+function scansDashboardRefresh() {
+    // Get the current value of the "active" parameter
+    console.log("scansTableRefresh");
+    // Get the URL of the page to request the table data from
+    var url = $("#datatablesSimpleDashScans").attr("report-url");
+    // 
+    var table = $('#datatablesSimpleDashScans').DataTable( {
+        ajax: url,
+        columns: [
+            { data: 'scanName', title: 'Name', 
+                render: function(data, type, row, meta) {
+                    return '<a href=' + '/scans/' + row.id + '>'+row.scanName+'</a>';
+                }
+            },
+            {
+              data: 'Fresourcegroup',
+              title: 'Group',
+              render: function(data, type, row, meta) {
+                return '<a href=' + '/groups/' + row.resourcegroup_id + '>'+row.Fresourcegroup+'</a>';
+              }
+            },
+            { data: 'Fstatus', title: 'Status' },
+        ],
+        order: [[2, 'desc']],
+        searching: false,
+        lengthChange: false,
+        paging: false,
+        info: false,
+    } );
+    setInterval(function() {
+        table.ajax.reload();
+    }, 100000);
+}
 
 $(document).ready(function(){
+    scansDashboardRefresh();
+    
+    
     createDashboardChart();
     $('#changes-carousel').carousel();
     $("#dashboardDismiss").click(function(e){

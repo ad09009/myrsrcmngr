@@ -546,7 +546,8 @@ def host_changes_refresh(request, pk):
                     'str_open_ports': host.str_open_ports(),
             }
         return JsonResponse({"data":totals}) 
-
+    
+@api_view(['GET'])
 def host_services_refresh(request, pk):
     if request.method == 'GET':
         host = hosts.objects.get(pk=pk)
@@ -937,3 +938,10 @@ def dashboard_chart(request):
             }
         }
         return JsonResponse({'data': data, 'options': options})
+    
+@api_view(['GET'])
+def dashboard_scans(request):
+    if request.method == 'GET':
+        allscans = scans.objects.filter(active=True)
+        serializer = ScansSerializer(allscans, many=True)
+        return JsonResponse({"data":serializer.data})

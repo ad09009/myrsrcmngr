@@ -10,6 +10,7 @@ urlpatterns = [
     path('dashboard/api/dismissed/', views.dashboard_dismiss, name='dashboard-dismiss'),
     path('dashboard/api/changes/', views.dashboard_changes, name='dashboard-changes'),
     path('changes/', views.dashboard_changes_table, name='changes-only'),
+    path('dashboard/api/scans/', views.dashboard_scans, name='dashboard-scans'),
     
     #Scans CRUD
     path('scans/', views.ScansListView.as_view(), name='scans-list'),
