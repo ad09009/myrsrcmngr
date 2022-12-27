@@ -148,7 +148,11 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-6">Report Compared to:</div>
+                                        {% if reports.prev_rep %}
                                         <div class="col-6 text-right"><a class="small text-white" href="{% url 'website:report-detail' reports.prev_rep %}">View Report</a></div>
+                                        {% else %}
+                                        <div class="col-6 text-right"><a class="small text-white disabled" href="#">No previous report</a></div>
+                                        {% endif %}
                                     </div>
                                     <div class="row">
                                         <div class="col-6">Total Report Level Changes:</div>
