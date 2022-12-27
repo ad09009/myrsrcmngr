@@ -41,8 +41,8 @@
                         {% endif %}
                     </div>
                     <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white" href="{% url 'website:scans-list' %}">View Scans</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        <a class="small" href="{% url 'website:scans-list' %}">View Scans</a>
+                        <div class="small"><i class="fas fa-angle-right"></i></div>
                     </div>
                 </div>
             </div>
@@ -128,17 +128,6 @@
                             <th>Total Changes</th>
                         </tr>
                     </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Observed at</th>
-                            <th>Parameters</th>
-                            <th>Hosts Up</th>
-                            <th>Hosts Down</th>
-                            <th>Host Changes</th>
-                            <th>Service Changes</th>
-                            <th>Total Changes</th>
-                        </tr>
-                    </tfoot>
                     <tbody>
                     {% for key, value in con.items %}
                         <tr>
