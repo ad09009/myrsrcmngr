@@ -4,6 +4,7 @@ from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.dateformat import DateFormat
 from django.core.validators import MinValueValidator, MinLengthValidator
 from datetime import datetime
+from .custom_validators import *
 
 class resourcegroups(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
@@ -15,6 +16,12 @@ class resourcegroups(models.Model):
     ip_addresses = models.TextField("IP Addresses",blank=True, null=True)
     def __str__(self):
         return self.name
+    
+    def value_is_subnet(self):
+        return is_subnet(self.subnet)
+    
+    def listify_ip_addresses(self):
+        return listify(self.ip_addresses)
     
     def formatted_add_date(self):
         if self.add_date:
@@ -128,6 +135,17 @@ class scans(models.Model):
         return {
             
         }
+    
+    def get_target(self):
+        if self.resourcegroup:
+            target = self.resourcegroup
+            if target.value_is_subnet:
+                return target.subnet
+            else:
+                return listify(target.subnet)
+        else:
+            return False
+    
     
     def formatted_status(self):
         # Return the string value of the status attribute
