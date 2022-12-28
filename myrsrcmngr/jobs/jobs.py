@@ -369,14 +369,18 @@ def parse_call(xml_result, filepath, scanid):
 
 def scan_call():
     #check for active scan
+    # MOVE ALL THIS TO UPDATER
     print("new job called")
     try:
+        #ADD filter STATUS!=RUNNING
         active_scan = scans.objects.get(active=True) #just one active scan at the same time should be possible
     #if none write to log and exit
     except scans.DoesNotExist:
         print("No active scan") #replace with log
         return 0
+    
     except scans.MultipleObjectsReturned:
+        #RUN MULTI THREADING
         print("Multiple objects returned") #replace with log
         return 1
     print("scan exists")
