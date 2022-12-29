@@ -14,6 +14,8 @@ import os
 from chartjs.views.lines import BaseLineChartView
 import random
 from django.db.models import Q
+from django.core.exceptions import ValidationError
+import re
 
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups, services, changes
@@ -153,11 +155,8 @@ def dashboard(request):
         try:
             rreport = rgroup.reports_set.latest('id')
             groupname = rgroup.name
-            print(groupname)
             rchanges = rreport.changes_set.all().exclude(attribute='elapsed')
-            print(rchanges)
             changes_count = rchanges.count()
-            print(changes_count)
             if rchanges:
                 report_changes['hosts_changed'] = 0
                 report_changes['hosts_added'] = 0
@@ -170,8 +169,6 @@ def dashboard(request):
                 report_changes['hosts_total'] = None
                 counter = 0
                 for change in rchanges:
-                    print(change)
-                    print(counter)
                     counter = counter + 1
                     if change.attribute == 'hosts_up':
                         print('hosts_up', change.cur_val, change.prev_val)
@@ -205,7 +202,6 @@ def dashboard(request):
                 'changes_count':changes_count,
             }
         except:
-            print("no report")
             rreport = None
     context = {
         'con': con
@@ -586,13 +582,13 @@ def hosts_refresh(request):
 
 class ResourcegroupCreateView(GroupOwnerCreateView):
     model = resourcegroups
-    form_class = GroupsForm
+    fields = ['name','description', 'subnet']
     # By convention:
     # template_name = "website/hosts_form.html"
 
 class ResourcegroupUpdateView(GroupOwnerUpdateView):
     model = resourcegroups
-    form_class = GroupsForm
+    fields = ['name','description', 'subnet']
     # By convention:
     # template_name = "website/scans_form.html"
 

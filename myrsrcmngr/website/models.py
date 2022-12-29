@@ -3,13 +3,14 @@ from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.dateformat import DateFormat
 from django.core.validators import MinValueValidator, MinLengthValidator
-from datetime import datetime
+from datetime import datetime, timedelta
 from .custom_validators import *
+from django.utils import timezone
 
 class resourcegroups(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now = True, null=True)
-    subnet = models.CharField("Subnet", max_length=100, blank=True, null=True, help_text = 'Only IPv4 addresses are supported. Indicate subnet in CIDR notation (e.g. 198.162.0.1/24)')
+    subnet = models.CharField("Subnet or IP list", max_length=100, blank=True, null=True, validators=[validate_ips_or_subnet,], help_text = 'Only IPv4 addresses are supported. Indicate subnet in CIDR notation (e.g. 198.162.0.1/24) or IPv4 address list (comma separated)')
     name = models.CharField("Group Name",max_length=200, validators=[MinLengthValidator(3),])
     description = models.CharField("Description",max_length=600, blank=True, null=True)
     user = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)
@@ -146,6 +147,30 @@ class scans(models.Model):
         else:
             return False
     
+    def get_next_exec_interval(self):
+        if self.ScanSchedule == 'hh':
+            return 30
+        elif self.ScanSchedule == 'h':
+            return 60
+        elif self.ScanSchedule == 'd':
+            return 1440
+        elif self.ScanSchedule == 'w':
+            return 10080
+        else:
+            return 15
+    
+    def next_execution_calc(self):
+        if self.ScanSchedule == 'hh':
+            next_at_delta = timedelta(minutes=30)
+        elif self.ScanSchedule == 'h':
+            next_at_delta = timedelta(hours=1)
+        elif self.ScanSchedule == 'd':
+            next_at_delta = timedelta(days=1)
+        elif self.ScanSchedule == 'w':
+            next_at_delta = timedelta(days=7)
+        else:
+            next_at_delta = timedelta(minutes=15)
+        return timezone.now() + next_at_delta
     
     def formatted_status(self):
         # Return the string value of the status attribute

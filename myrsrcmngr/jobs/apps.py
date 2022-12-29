@@ -6,6 +6,6 @@ class JobsConfig(AppConfig):
     name = 'jobs'
         
     def ready(self):
-        from . import updater
-        updater.start()
+        from . import scanscheduler
+        scanscheduler.start()
 

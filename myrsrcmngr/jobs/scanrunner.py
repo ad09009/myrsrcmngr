@@ -1,194 +1,49 @@
 #import models
-from models import scans, resourcegroups, hosts, hosts_added_removed, reports, services, services_added_removed, changes
+from website.models import scans, resourcegroups, hosts, hosts_added_removed, reports, services, services_added_removed, changes
 
-import threading
 from django.utils import timezone
 from libnmap.process import NmapProcess
 from libnmap.parser import NmapParser
 import os
-from datetime import datetime, timedelta
-from time import sleep
+from datetime import datetime
 from django.conf import settings
-
-#Need a way to enforce one scan active per group at a time
-#Need to include a way to get targets from linked hosts
-#Implement logging for scans
-#Implement nmap log saving to files
-
+from time import sleep
     
+def scancaller(scan):
+    scanrun = ScanRunner(scan)
+    if scanrun.error:
+        print(f"Error in scanning or parsing scan {scan.id} {scan.scanName} for resource group {scan.resourcegroup.name}")
 
-#scan results
-scan_results = []
-
-def save_nmap_report_or_log(report_content, report_name, mode):
-    # Create the folder to save the report if it doesn't exist
-    if mode == "report":
-        dir = "reports"
-        ext = ".xml"
-    elif mode == "log":
-        dir = "logs"
-        ext = ".log"
-    else:
-        return False
-    try:
-        report_folder = os.path.join(settings.BASE_DIR, dir)
-        if not os.path.exists(report_folder):
-            os.makedirs(report_folder)
-
-        # Save the report to the folder
-        report_path = os.path.join(report_folder, report_name + ext)
-        with open(report_path, 'w') as report_file:
-            report_file.write(report_content)
-        return report_path
-    except:
-        print("Failed to create report or log file")
-        return False
-
-def scan_call(scan):
-    print("Scanning", scan.get_target(), "with options", scan.ScanTemplate)
-    
-    # Do the scan here
-    
-    #Start the scan
-    nmap_proc = NmapProcess(targets=scan.get_target(), options=scan.ScanTemplate, safe_mode=False)
-    nmap_proc.run_background()
-    
-    #Set status to running
-    scan.status = nmap_proc.state
-    scan.save()
-    
-    #Update scan execution statuses
-    while nmap_proc.is_running():
-        nmaptask = nmap_proc.current_task
-        if nmaptask:
-            scan.task_name = nmaptask.name
-            scan.task_status = nmaptask.status
-            scan.task_etc = nmaptask.etc
-            scan.task_progress = nmaptask.progress
-            scan.save()
-            print(
-                "Task {0} ({1}): ETC: {2} DONE: {3}%".format(
-                    nmaptask.name, nmaptask.status, nmaptask.etc, nmaptask.progress
-                )
-            )
-    #Update last execution time
-    scan.last_executed = timezone.now()
-    
-    # Update the scan object
-    
-    #Update the next execution time
-    scan.next_execution_at = scan.next_execution_calc()
-    
-    #Update the status
-    scan.status = nmap_proc.state
-    #if scan failed, set active to false
-    if nmap_proc.state == 4:
-        scan.active = False
-    
-    scan.save()
-    
-    ct_date = datetime.strftime(timezone.now(), '%Y_%m_%d_%H_%M_%s')
-    # Save the logs in a file
-    log_result = nmap_proc.stderr
-    logname = f"log_{scan.scanName}_{ct_date}.log"
-    log_path = save_nmap_report_or_log(log_result, logname, "log")
-    
-    # Save the report in a file
-    xml_result = nmap_proc.stdout
-    filename = f"scan_{scan.scanName}_{ct_date}.xml"
-    report_path = save_nmap_report_or_log(xml_result, filename, "report")
-    if report_path:
-        print("Report saved to", report_path)
-        scan_results.append((xml_result, report_path, scan.id))
-        return True
-    else:
-        return False
-
-
-def run_scan_threads():
-    #Get all scans that are active and not already running and have a next execution time less than or equal to now
-    scans = [scan for scan in scans.objects.filter(active=True).exclude(status=2) if scan.next_execution_at <= timezone.now()]
-    if not len(scans):
-        return False
-
-    threads = []
-    for scan in scans:    
-        print("target", scan.get_target(), '|', "option", scan.ScanTemplate)
-        thread = threading.Thread(target=scan_call, args=(scan))
-        threads.append(thread)
-        thread.start()
-        
-    for thread in threads:
-        thread.join()
-        
-    return True
-
-def parse_caller():
-    for result in scan_results:
-        parse_scan(result[0], result[1], result[2])
-        scan_results.remove(result)
-
-
-def scan_manager():
-    if run_scan_threads():
-        print(f"{len(scan_results)} scans complete, parsing results")
-        if parse_caller():
-            print("Scan results parsed")
-        else:
-            print("Did not parse scan results")
-    else:
-        print("No scans to run")
-
-
-
-class ScanManager:
-    def __init__(self):
-        self.scan_results = []
+class ScanRunner:
+    def __init__(self, scan):
+        self.scan = scan
         self.error = 0
+        self.scanid = scan.id
+        self.xml_result = None
+        self.report_path = None
+        self.main()
     
     def main(self):
-        if self.run_scan_threads():
-            print(f"{len(self.scan_results)} scans complete, parsing results")
-            if self.parse_caller():
+        if self.scan_call():
+            print("scan complete, parsing results")
+            if self.parse_call():
                 print("Scan results parsed")
             else:
                 print("Did not parse some scan results")
                 self.error = 1
         else:
-            print("No scans to run")
-        
-    def run_scan_threads(self):
-        #Get all scans that are active and not already running and have a next execution time less than or equal to now
-        scans = [scan for scan in scans.objects.filter(active=True).exclude(status=2) if scan.next_execution_at <= timezone.now()]
-        if not len(scans):
-            return False
-
-        threads = []
-        for scan in scans:    
-            print("target", scan.get_target(), '|', "option", scan.ScanTemplate)
-            thread = threading.Thread(target=self.scan_call, args=(scan))
-            threads.append(thread)
-            thread.start()
+            print("Error in scan call")
+            self.error = 1
             
-        for thread in threads:
-            thread.join()
+    def parse_call(self):
         
-        return True
-    
-    def parse_caller(self):
-        for result in self.scan_results:
-            self.parse_call(result[0], result[1], result[2])
-            self.scan_results.remove(result)
-        return True
-            
-    def parse_call(self, xml_result, filepath, scanid):
-        print(f"parsing file at {filepath} for scan id {scanid}")
+        print(f"parsing file at {self.report_path} for scan id {self.scanid}")
         #get prev rep id that had the scanid
-        prev_tuple = self.get_prev_rep(scanid)
+        prev_tuple = self.get_prev_rep()
         previous = prev_tuple[0]
         oldrep = prev_tuple[1]
         #parse new report file
-        rep_tuple = self.new_parse(xml_result, filepath, scanid)
+        rep_tuple = self.new_parse()
         created_rep = rep_tuple[0]
         newrep = rep_tuple[1]
         if created_rep.parse_success:
@@ -217,11 +72,11 @@ class ScanManager:
             return False
         return True
     
-    def get_prev_rep(self, scanid):
+    def get_prev_rep(self):
         previous = 0
         oldrep = 0
         try:
-            previous = reports.objects.filter(scan=scanid, is_last=True)[0]
+            previous = reports.objects.filter(scan=self.scanid, is_last=True)[0]
             try:
                 oldrep = NmapParser.parse_fromfile(previous.path_to)
             except:
@@ -232,7 +87,10 @@ class ScanManager:
             previous = 0
         return (previous, oldrep)
     
-    def new_parse(self, xml_result, filepath, scanid):
+    def new_parse(self):
+        xml_result = self.xml_result
+        filepath =  self.report_path
+        scanid = self.scanid
         status = True
         newrep = 0
         try:
@@ -538,62 +396,59 @@ class ScanManager:
         print("Did not fail on the diff parse, wow")
         return True
     
-    def scan_call(self, scan):
-        print("Scanning", scan.get_target(), "with options", scan.ScanTemplate)
+    def scan_call(self):
+        print("Scanning", self.scan.get_target(), "with options", self.scan.ScanTemplate)
         
         # Do the scan here
         
         #Start the scan
-        nmap_proc = NmapProcess(targets=scan.get_target(), options=scan.ScanTemplate, safe_mode=False)
+        nmap_proc = NmapProcess(targets=self.scan.get_target(), options=self.scan.ScanTemplate, safe_mode=False)
         nmap_proc.run_background()
         
         #Set status to running
-        scan.status = nmap_proc.state
-        scan.save()
+        self.scan.status = nmap_proc.state
+        self.scan.save()
         
         #Update scan execution statuses
         while nmap_proc.is_running():
             nmaptask = nmap_proc.current_task
             if nmaptask:
-                scan.task_name = nmaptask.name
-                scan.task_status = nmaptask.status
-                scan.task_etc = nmaptask.etc
-                scan.task_progress = nmaptask.progress
-                scan.save()
-                print(
-                    "Task {0} ({1}): ETC: {2} DONE: {3}%".format(
-                        nmaptask.name, nmaptask.status, nmaptask.etc, nmaptask.progress
-                    )
-                )
+                self.scan.task_name = nmaptask.name
+                self.scan.task_status = nmaptask.status
+                self.scan.task_etc = nmaptask.etc
+                self.scan.task_progress = nmaptask.progress
+                self.scan.save()
+                sleep(1)
         #Update last execution time
-        scan.last_executed = timezone.now()
+        self.scan.last_executed = timezone.now()
         
         # Update the scan object
         
         #Update the next execution time
-        scan.next_execution_at = scan.next_execution_calc()
+        self.scan.next_execution_at = self.scan.next_execution_calc()
         
         #Update the status
-        scan.status = nmap_proc.state
+        self.scan.status = nmap_proc.state
         #if scan failed, set active to false
         if nmap_proc.state == 4:
-            scan.active = False
+            self.scan.active = False
         
-        scan.save()
+        self.scan.save()
         
         ct_date = datetime.strftime(timezone.now(), '%Y_%m_%d_%H_%M_%s')
         # Save the logs in a file
         log_result = nmap_proc.stderr
-        logname = f"log_{scan.scanName}_{ct_date}.log"
+        logname = f"log_{self.scan.scanName}_{ct_date}.log"
         log_path = self.save_nmap_report_or_log(log_result, logname, "log")
         
         # Save the report in a file
         xml_result = nmap_proc.stdout
-        filename = f"scan_{scan.scanName}_{ct_date}.xml"
+        filename = f"scan_{self.scan.scanName}_{ct_date}.xml"
         report_path = self.save_nmap_report_or_log(xml_result, filename, "report")
         if report_path:
             print("Report saved to", report_path)
-            self.scan_results.append((xml_result, report_path, scan.id))
+            self.xml_result = xml_result
+            self.report_path = report_path            
             return True
         else:
             return False
