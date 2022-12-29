@@ -288,10 +288,39 @@ class ScansListView(ListView):
 def scan_toggle(request, pk):
     if request.method == 'POST':
         active = request.POST.get('active')
-        scan = scans.objects.get(pk=pk)
-        scan.active = active
-        scan.save()
+        active_scan = get_object_or_404(scans, pk=pk)
+        if active and active_scan:
+            #Get all scans belonging to the same resource group that have active set to 1 and are not the current scan
+            other_active_scans = scans.objects.filter(resourcegroup=active_scan.resourcegroup).exclude(active=False).exclude(id=active_scan.id)
+        
+            #Change all other active scans to False
+            for other_active_scan in other_active_scans:
+                other_active_scan.active = False
+                other_active_scan.save()
+        elif active_scan:
+            active_scan.active = active
+            active_scan.save()
         return JsonResponse({"active":active})
+    
+    
+@api_view(['POST', 'GET'])
+def set_standard_report(request, pk):
+    if request.method == 'POST':
+        standard = request.POST.get('standard')
+        report = get_object_or_404(reports, pk=pk)
+        if standard:
+            #Get all reports belonging to the same scan that have standard set to 1 and are not the current report
+            other_standard_reports = reports.objects.filter(scan=report.scan).exclude(standard=0).exclude(id=report.id)
+        
+            #Change all other standard reports to 0
+            for other_standard_report in other_standard_reports:
+                other_standard_report.standard = 0
+                other_standard_report.save()
+        
+        #Set the current report to standard
+        report.standard = standard
+        report.save()
+        return JsonResponse({"standard":standard})
 
 @api_view(['GET'])
 def scan_refresh(request, pk):
