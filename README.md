@@ -46,17 +46,17 @@ To install the project and its dependencies, first create and activate a dedicat
 
 ## Use case
 
-- 1. Register and/or log in
-- 2. Go to Groups, click on Options and Create New Group.
-- 3. Enter Group name, description (optionally) and the target subnet (in CIDR notation) or IPv4 addresses (comma separated list) and click Save.
-- 4. Navigate to Scans, click on Options and Create New Scan.
-- 5. Choose the previously created Group, enter a name for the Scan, choose Nmap options to run from template list and choose a schedule for the Scan, then press Save.
-- 6. Find the newly created Scan, open it, click on Options and click "Turn On". Your scan should start execution in a few seconds, you will see the status in the Status panel.
-- 7. When scan execution finishes, the generated report will be listed in a table under the scan.
-- 8. You can navigate to the report, click on Options and Download Report to save the full xml file.
-- 9. Or study the results in other views of the web app, like the Dashboard.
-- 10. Now that you have one report done, every next Nmap report for this scan will be able to provide a comparison, noting important changes which are displayed on the Dashboard, in the report detail view and on host detail view as well.
-- 11. Be default each new report is compared to the previous report for this scan. This can be changed to a permanent Standard report to compare to - choose a report, click on Options and Set as Standard to do that.
+1. Register and/or log in
+2. Go to Groups, click on Options and Create New Group.
+3. Enter Group name, description (optionally) and the target subnet (in CIDR notation) or IPv4 addresses (comma separated list) and click Save.
+4. Navigate to Scans, click on Options and Create New Scan.
+5. Choose the previously created Group, enter a name for the Scan, choose Nmap options to run from template list and choose a schedule for the Scan, then press Save.
+6. Find the newly created Scan, open it, click on Options and click "Turn On". Your scan should start execution in a few seconds, you will see the status in the Status panel.
+7. When scan execution finishes, the generated report will be listed in a table under the scan.
+8. You can navigate to the report, click on Options and Download Report to save the full xml file.
+9. Or study the results in other views of the web app, like the Dashboard.
+10. Now that you have one report done, every next Nmap report for this scan will be able to provide a comparison, noting important changes which are displayed on the Dashboard, in the report detail view and on host detail view as well.
+11. Be default each new report is compared to the previous report for this scan. This can be changed to a permanent Standard report to compare to - choose a report, click on Options and Set as Standard to do that.
 
 
 ### Limitations
