@@ -10,14 +10,14 @@ from .models import Profile
 
 from .owner import OwnerDetailView, OwnerUpdateView, OwnerDeleteView, AddrOwnerUpdateView
 
-from django.utils.translation import gettext_lazy as _
+#from django.utils.translation import gettext_lazy as _
 
 # Create your views here.
 class register(SuccessMessageMixin, generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'users/register.html'
-    success_message = _('User %(username)s was created successfully. Log in, please.')
+    success_message = 'User %(username)s was created successfully. Log in, please.'
 
     # the following is an overwritten dispatch method to redirect
     # logged in users away from the registration page

@@ -656,7 +656,7 @@ def download_report(request, pk):
 
     # Check if the report has a file associated with it
     if not report.path_to:
-        # If not, return a 404 error
+        
         return HttpResponseNotFound("No file associated with this report")
 
     # Get the file path for the report's file
@@ -664,14 +664,14 @@ def download_report(request, pk):
 
     # Check if the file exists
     if not os.path.exists(file_path):
-        # If not, return a 404 error
+        
         return HttpResponseNotFound("File not found")
 
     # Open the file in binary mode
     with open(file_path, 'rb') as f:
-        # Create a Django response object with the file's contents
+        
         response = HttpResponse(f.read(), content_type="application/xml")
-        # Set the response's content-disposition header to tell the browser to download the file
+        
         response['Content-Disposition'] = f'attachment; filename="{report.download_name()}.xml"'
         # Return the response
         return response

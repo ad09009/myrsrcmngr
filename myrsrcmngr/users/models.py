@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 class Profile(models.Model):
     userfor = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=400, blank=True)
+    bio = models.TextField("Role", max_length=400, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     #userlikes = models.ManyToManyField("FoodType", blank=True)
 
