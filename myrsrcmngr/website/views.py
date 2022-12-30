@@ -880,13 +880,12 @@ def reports_chart(request):
         #Number of changes in report over time per scan
         color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(scans.objects.all().count())]
         datasets = []
-        for scan in scans.objects.all().order_by('id'):
+        for scan in scans.objects.all().filter(active=True).order_by('id'):
             reps = scan.reports_set.all().filter(parse_success=True).order_by('id')
             if reps:
                 dataset = {
                     'label': scan.scanName,
-                    'data': [rep.hosts_up for rep in reps if rep.hosts_up],
-                        'backgroundColor': random.choice(color_codes),
+                    'data': [rep.hosts_up for rep in reps if rep.hosts_up < 100],
                         'fill': False,
                         'borderColor': random.choice(color_codes), 
                         'borderWidth': 1,
