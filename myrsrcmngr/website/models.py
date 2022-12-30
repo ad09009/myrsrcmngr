@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.dateformat import DateFormat
-from django.core.validators import MinValueValidator, MinLengthValidator
+from django.core.validators import MinLengthValidator
 from datetime import datetime, timedelta
 from .custom_validators import *
 from django.utils import timezone
@@ -10,19 +10,15 @@ from django.utils import timezone
 class resourcegroups(models.Model):
     add_date = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now = True, null=True)
-    subnet = models.CharField("Subnet or IP list", max_length=100, blank=True, null=True, validators=[validate_ips_or_subnet,], help_text = 'Only IPv4 addresses are supported. Indicate subnet in CIDR notation (e.g. 198.162.0.1/24) or IPv4 address list (comma separated)')
+    subnet = models.CharField("Subnet or IP list", max_length=100, blank=False, null=False, unique=True, validators=[validate_ips_or_subnet,], help_text = 'Only IPv4 addresses are supported. Indicate subnet in CIDR notation (e.g. 198.162.0.1/24) or IPv4 address list (comma separated)')
     name = models.CharField("Group Name",max_length=200, validators=[MinLengthValidator(3),])
     description = models.CharField("Description",max_length=600, blank=True, null=True)
     user = models.ForeignKey(User, null = True, on_delete=models.SET_NULL)
-    ip_addresses = models.TextField("IP Addresses",blank=True, null=True)
     def __str__(self):
         return self.name
     
     def value_is_subnet(self):
         return is_subnet(self.subnet)
-    
-    def listify_ip_addresses(self):
-        return listify(self.ip_addresses)
     
     def formatted_add_date(self):
         if self.add_date:
@@ -136,6 +132,9 @@ class scans(models.Model):
         return {
             
         }
+    
+    def report_count(self):
+        return self.reports_set.all().filter(parse_success=True).count()
     
     def get_target(self):
         if self.resourcegroup:

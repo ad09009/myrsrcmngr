@@ -263,13 +263,13 @@ def dashboard(request):
 
 class ScanCreateView(OwnerCreateView):
     model = scans
-    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule', 'active']
+    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule']
     # By convention:
     # template_name = "website/scans_form.html"
 
 class ScanUpdateView(OwnerUpdateView):
     model = scans
-    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule', 'active']
+    fields = ['resourcegroup', 'scanName', 'ScanTemplate', 'ScanSchedule']
     # By convention:
     # template_name = "website/scans_form.html"
 
@@ -880,23 +880,23 @@ def reports_chart(request):
         #Number of changes in report over time per scan
         color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(scans.objects.all().count())]
         datasets = []
-        for scan in scans.objects.all():
-            reps = scan.reports_set.all().filter(parse_success=True)
+        for scan in scans.objects.all().order_by('id'):
+            reps = scan.reports_set.all().filter(parse_success=True).order_by('id')
             if reps:
                 dataset = {
                     'label': scan.scanName,
-                    'data': [rep.changes_count() for rep in reps if rep.changes_count() > 0],
-                        'backgroundColor': color_codes.pop(0),
+                    'data': [rep.hosts_up for rep in reps if rep.hosts_up],
+                        'backgroundColor': random.choice(color_codes),
                         'fill': False,
-                        'borderColor': color_codes.pop(0), 
+                        'borderColor': random.choice(color_codes), 
                         'borderWidth': 1,
                         'pointRadius': 3,
                         'pointHoverRadius': 5, 
                 }
                 datasets.append(dataset)
-        allreports = reports.objects.all().filter(parse_success=True)
+        allreports = reports.objects.all().filter(parse_success=True).order_by('-id')
         data = {
-            'labels': [report.f_started_str() for report in allreports if report.changes_count() > 0],
+            'labels': [report.f_started_str() for report in allreports if report.parse_success],
             'datasets': datasets
         }
         options = {
