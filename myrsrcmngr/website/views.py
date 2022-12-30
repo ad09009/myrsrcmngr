@@ -7,18 +7,19 @@ from django.contrib.humanize.templatetags.humanize import naturaltime
 from .serializers import ScansSerializer, ReportsSerializer, ResourcegroupsSerializer, HostsSerializer, ServicesSerializer
 from rest_framework.decorators import api_view
 from .owner import OwnerCreateView, OwnerUpdateView, OwnerDeleteView, GroupOwnerCreateView, GroupOwnerUpdateView, GroupOwnerDeleteView, HostOwnerUpdateView
-from .forms import GroupsForm
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseNotAllowed
 import os
-from chartjs.views.lines import BaseLineChartView
 import random
 from django.db.models import Q
-from django.core.exceptions import ValidationError
-import re
+from django.utils import timezone
+import logging
+
+
 
 # Create your views here.
 from .models import scans, hosts, reports, resourcegroups, services, changes
+logger = logging.getLogger(__name__)
 
 def index(request):
     con = {}
@@ -289,7 +290,7 @@ def scan_toggle(request, pk):
     if request.method == 'POST':
         active = request.POST.get('active')
         active_scan = get_object_or_404(scans, pk=pk)
-        if active and active_scan:
+        if active:
             #Get all scans belonging to the same resource group that have active set to 1 and are not the current scan
             other_active_scans = scans.objects.filter(resourcegroup=active_scan.resourcegroup).exclude(active=False).exclude(id=active_scan.id)
         
@@ -297,30 +298,10 @@ def scan_toggle(request, pk):
             for other_active_scan in other_active_scans:
                 other_active_scan.active = False
                 other_active_scan.save()
-        elif active_scan:
-            active_scan.active = active
-            active_scan.save()
+        active_scan.active = active
+        active_scan.next_execution_at = timezone.now()
+        active_scan.save()
         return JsonResponse({"active":active})
-    
-    
-@api_view(['POST', 'GET'])
-def set_standard_report(request, pk):
-    if request.method == 'POST':
-        standard = request.POST.get('standard')
-        report = get_object_or_404(reports, pk=pk)
-        if standard:
-            #Get all reports belonging to the same scan that have standard set to 1 and are not the current report
-            other_standard_reports = reports.objects.filter(scan=report.scan).exclude(standard=0).exclude(id=report.id)
-        
-            #Change all other standard reports to 0
-            for other_standard_report in other_standard_reports:
-                other_standard_report.standard = 0
-                other_standard_report.save()
-        
-        #Set the current report to standard
-        report.standard = standard
-        report.save()
-        return JsonResponse({"standard":standard})
 
 @api_view(['GET'])
 def scan_refresh(request, pk):

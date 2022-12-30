@@ -7,8 +7,8 @@ from .scanrunner import *
 class ScanScheduler:
     def __init__(self):
         self.scheduler = BackgroundScheduler()
-        self.scheduler.add_job(self.check_for_new_scans, 'interval', seconds=60)
-        self.scheduler.add_job(self.check_for_inactive_scans, 'interval', seconds=37)
+        self.scheduler.add_job(self.check_for_new_scans, 'interval', seconds=15)
+        self.scheduler.add_job(self.check_for_inactive_scans, 'interval', seconds=17)
         self.run()
         self.scheduler.start()
 

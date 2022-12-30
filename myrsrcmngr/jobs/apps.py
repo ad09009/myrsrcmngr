@@ -8,4 +8,6 @@ class JobsConfig(AppConfig):
     def ready(self):
         from . import scanscheduler
         scanscheduler.start()
+        #from . import updater
+        #updater.start()
 

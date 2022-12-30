@@ -24,21 +24,26 @@ function updateMsg() {
             $('#active-scanprogress').text(scanreturn['active']);
             $('#status-scanprogress').text(scanreturn['scan_status']);
             if (scanreturn['active'] == 'OFF'){
+                $('#toggle-button').prop('disabled', false);
                 $('#next-exec-scanprogress').hide();
                 $('#scanprogress').hide();
             }
             else{
-                $('#next-val-scanprogress').text(scanreturn['next_at']);
-                $('#next-exec-scanprogress').show();
+
                 
                 if (scanreturn['scan_status'] == "RUNNING"){
+                    $('#toggle-button').prop('disabled', true);
                     $('#task-name-scanprogress').text(scanreturn['namet']);
                     $('#task-status-scanprogress').text(scanreturn['status']);
                     $('#task-progress-scanprogress').css('width', scanreturn['progress'] + '%').text(scanreturn['progress'] + '%');
                     $('#scanprogress').show();
+                    $('#next-exec-scanprogress').hide();
                 }
                 else {
+                    $('#toggle-button').prop('disabled', false);
                     $('#scanprogress').hide();
+                    $('#next-val-scanprogress').text(scanreturn['next_at']);
+                    $('#next-exec-scanprogress').show();
                 }
             }
         }
