@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
+from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from datetime import datetime, timedelta
+from datetime import datetime
 from .models import scans
 from django.http import HttpResponseRedirect
 

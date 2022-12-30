@@ -1,50 +1,4 @@
-function updateMsg() {
-    console.log('Requesting scan JSON');
-    var urlis = $("#scanprogress").attr("data-ajax-target");
-    var spinner = $("#scanprogress").attr("altstuff");
-    $.getJSON(urlis, function(scanreturn){
-        console.log('JSON', scanreturn);
 
-        /*Status updates*/
-        /*if no scan is found by the ajax call*/
-        if (scanreturn['scan'] == 0){
-            $('#stable-scanprogress').empty();
-            $('#scanprogress').empty();
-            $('#statslist').empty();
-            $('#stable-scanprogress').append('<p>'+'Scan not found'+'</p>');
-        }
-        else {
-            /*Stats updates*/
-            $('#statslist-report-count').text(scanreturn['num_reports']);
-            $('#statslist-exec-time').text(scanreturn['average_duration']+ ' seconds');
-            $('#statslist').show();
-            /* Info update*/
-            $('#last-exec-scanprogress').text(scanreturn['last_executed']);
-            /*Status updates*/
-            $('#active-scanprogress').text(scanreturn['active']);
-            $('#status-scanprogress').text(scanreturn['scan_status']);
-            if (scanreturn['active'] == 'OFF'){
-                $('#next-exec-scanprogress').hide();
-                $('#scanprogress').hide();
-            }
-            else{
-                $('#next-val-scanprogress').text(scanreturn['next_at']);
-                $('#next-exec-scanprogress').show();
-                
-                if (scanreturn['scan_status'] == "RUNNING"){
-                    $('#task-name-scanprogress').text(scanreturn['namet']);
-                    $('#task-status-scanprogress').text(scanreturn['status']);
-                    $('#task-progress-scanprogress').css('width', scanreturn['progress'] + '%').text(scanreturn['progress'] + '%');
-                    $('#scanprogress').show();
-                }
-                else {
-                    $('#scanprogress').hide();
-                }
-            }
-        }
-        setTimeout('updateMsg()', 3000);
-    });
-}
 function scansTotals() {
     var url = $("#info-tab-pane").attr("report-url");
     $.ajax({
@@ -95,7 +49,7 @@ function scansTableRefresh() {
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 3000);
+    }, 40000);
 }
 var handle = null;
 function updateChartData() {
@@ -111,51 +65,6 @@ function updateChartData() {
       }
     });
   }
-
-function createChart() {
-    var url = $("#scanchart").attr("ajax-target");
-    $.ajax({
-        url: url,
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-
-            var ctx = document.getElementById('my-chart').getContext('2d');
-            var chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Scans Created', 'Scans Active', 'Scans Running'],
-                    datasets: [{
-                        label: 'Scans',
-                        data: data,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
-            });
-            
-        }
-    });
-}
 
 function createScanChart() {
     var url = $("#scanchart").attr("ajax-target");
@@ -173,7 +82,7 @@ function createScanChart() {
             handle = chart;
         }
     });
-    setInterval(updateChartData(), 10000);
+    setInterval(updateChartData(), 20000);
 }
 
 
@@ -181,9 +90,8 @@ $(document).ready(function(){
     createScanChart();
     scansTableRefresh();
     scansTotals();
-    setInterval(scansTotals, 7000);
+    setInterval(scansTotals, 20000);
 
     $.ajaxSetup({ cache:false });
-    updateMsg();
 
 });

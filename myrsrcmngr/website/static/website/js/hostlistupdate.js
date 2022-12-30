@@ -39,7 +39,7 @@
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 10000);
+    }, 40000);
 }
 
   function hostsTotals() {

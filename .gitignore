@@ -2,6 +2,7 @@ kvald/
 reports/
 scanner3/
 base.xml
+myrsrcmngr/reports/*.xml
 myrsrcmngr/website/logs/*.log
 myrsrcmngr/website/reports/*.xml
 myrsrcmngr/website/static/website/DataTables/

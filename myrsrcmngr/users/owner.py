@@ -37,7 +37,7 @@ class OwnerDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         text = _('Your profile was deleted. Sad to see you go!')
         messages.success(self.request, text)
-        return reverse_lazy("receptes:receptes-home")
+        return reverse_lazy("website:index")
     
     def get_queryset(self):
         qs = super(OwnerDeleteView, self).get_queryset()

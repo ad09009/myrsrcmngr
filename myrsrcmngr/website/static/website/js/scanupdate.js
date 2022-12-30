@@ -50,38 +50,6 @@ function updateMsg() {
         setTimeout('updateMsg()', 3000);
     });
 }
-function toggleActive3() {
-    var url = $("#activebutton").attr("scan-ajax-target");
-    var id = $("#activebutton").attr("scan-id");
-    $("#activebutton").click(function(e) {
-        e.preventDefault();
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: { 
-                active: $(this).val(),
-                id: id 
-            },
-            success: function(result) {
-                if (!result){
-                    $("#activebutton").css("background-color", "green");
-                    $("#activebutton").text("Active");
-                    $("#activebutton").val(1);
-                }else{
-                    $("#activebutton").css("background-color", "red");
-                    $("#activebutton").text("Inactive");
-                    $("#activebutton").val(0);
-                }
-                alert('ok');
-                console.log(result);
-            },
-            error: function(result) {
-                alert('error');
-                console.log(result);
-            }
-        });
-    });
-}
 
 function getCookie(name) {
     let cookieValue = null;

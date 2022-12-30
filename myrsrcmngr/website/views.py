@@ -14,6 +14,7 @@ import random
 from django.db.models import Q
 from django.utils import timezone
 import logging
+from django.db.models import Count
 
 
 
@@ -847,12 +848,14 @@ def scans_chart(request):
 def hosts_chart(request):
     if request.method == 'GET':        
         allhosts = hosts.objects.all().filter(status='up')
-        hostcount = allhosts.count()
-        color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(hostcount)]
+        color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(10)]
+        allhosts = allhosts.annotate(open_ports=Count('services__state', filter=Q(services__state='open'))).order_by('-open_ports')[:10]
+        for i in allhosts:
+            print(i)
         data = {
-            'labels': [host.main_address for host in allhosts if host.num_open_ports() > 0],
+            'labels': [host.main_address for host in allhosts],
             'datasets': [{
-                'data': [host.num_open_ports() for host in allhosts if host.num_open_ports() > 0],
+                'data': [host.num_open_ports() for host in allhosts],
                 'backgroundColor': color_codes,
                 'borderWidth': 2
             }]

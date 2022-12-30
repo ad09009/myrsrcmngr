@@ -1,50 +1,4 @@
-function updateMsg() {
-    console.log('Requesting scan JSON');
-    var urlis = $("#scanprogress").attr("data-ajax-target");
-    var spinner = $("#scanprogress").attr("altstuff");
-    $.getJSON(urlis, function(scanreturn){
-        console.log('JSON', scanreturn);
 
-        /*Status updates*/
-        /*if no scan is found by the ajax call*/
-        if (scanreturn['scan'] == 0){
-            $('#stable-scanprogress').empty();
-            $('#scanprogress').empty();
-            $('#statslist').empty();
-            $('#stable-scanprogress').append('<p>'+'Scan not found'+'</p>');
-        }
-        else {
-            /*Stats updates*/
-            $('#statslist-report-count').text(scanreturn['num_reports']);
-            $('#statslist-exec-time').text(scanreturn['average_duration']+ ' seconds');
-            $('#statslist').show();
-            /* Info update*/
-            $('#last-exec-scanprogress').text(scanreturn['last_executed']);
-            /*Status updates*/
-            $('#active-scanprogress').text(scanreturn['active']);
-            $('#status-scanprogress').text(scanreturn['scan_status']);
-            if (scanreturn['active'] == 'OFF'){
-                $('#next-exec-scanprogress').hide();
-                $('#scanprogress').hide();
-            }
-            else{
-                $('#next-val-scanprogress').text(scanreturn['next_at']);
-                $('#next-exec-scanprogress').show();
-                
-                if (scanreturn['scan_status'] == "RUNNING"){
-                    $('#task-name-scanprogress').text(scanreturn['namet']);
-                    $('#task-status-scanprogress').text(scanreturn['status']);
-                    $('#task-progress-scanprogress').css('width', scanreturn['progress'] + '%').text(scanreturn['progress'] + '%');
-                    $('#scanprogress').show();
-                }
-                else {
-                    $('#scanprogress').hide();
-                }
-            }
-        }
-        setTimeout('updateMsg()', 3000);
-    });
-}
 function groupsTotals() {
     var url = $("#group-info-tab-pane").attr("report-url");
     $.ajax({
@@ -92,7 +46,7 @@ function groupsTableRefresh() {
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 3000);
+    }, 10000);
 }
 
 var handle = null;
@@ -127,16 +81,15 @@ function createGroupChart() {
             handle = chart;
         }
     });
-    setInterval(updateGrChartData(), 10000);
+    setInterval(updateGrChartData(), 20000);
 }
 
 $(document).ready(function(){
     createGroupChart();
     groupsTableRefresh();
     groupsTotals();
-    setInterval(groupsTotals(), 7000);
+    setInterval(groupsTotals(), 20000);
 
     $.ajaxSetup({ cache:false });
-    updateMsg();
 
 });
