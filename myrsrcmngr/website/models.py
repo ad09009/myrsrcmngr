@@ -213,7 +213,7 @@ class scans(models.Model):
     
     def formatted_last_executed(self):
         if self.last_executed:
-            return DateFormat(self.last_executed).format("jS F Y")
+            return DateFormat(self.last_executed).format("Y-m-d H:i:s")
         else:
             return "Never"
     

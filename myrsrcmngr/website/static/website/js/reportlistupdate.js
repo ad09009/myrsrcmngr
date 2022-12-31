@@ -1,6 +1,5 @@
 
   function reportsTableRefresh() {
-    // Get the current value of the "active" parameter
     console.log("reportsTableRefresh");
     // Get the URL of the page to request the table data from
     var url = $("#datatablesSimple4").attr("report-url");
@@ -34,7 +33,7 @@
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 3000);
+    }, 7000);
   }
 
   function reportsTotals() {
@@ -88,14 +87,14 @@ function createReportChart() {
         }
         
     });
-    setInterval(updateChartData(), 10000);
+    setInterval(updateChartData(), 15000);
 }
 
 
 $(document).ready(function(){
     reportsTotals();
     createReportChart();
-    setInterval(reportsTotals(), 7000);
+    setInterval(reportsTotals(), 10000);
     reportsTableRefresh();
 
 });

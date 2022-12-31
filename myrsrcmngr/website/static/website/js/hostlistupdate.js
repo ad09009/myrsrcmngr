@@ -91,14 +91,14 @@ function createHostChart() {
         }
         
     });
-    setInterval(updateChartData(), 10000);
+    setInterval(updateChartData(), 20000);
 }
 
 
 $(document).ready(function(){
     createHostChart();
     hostsTotals();
-    setInterval(hostsTotals(), 7000);
+    setInterval(hostsTotals(), 10000);
     hostsTableRefresh();
 
 });

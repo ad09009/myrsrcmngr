@@ -210,11 +210,11 @@ function createDashboardChart() {
         }
         
     });
-    setInterval(updateChartData(), 20000);
+    setInterval(updateChartData(), 40000);
 }
 
 function scansDashboardRefresh() {
-    // Get the current value of the "active" parameter
+    
     console.log("scansTableRefresh");
     // Get the URL of the page to request the table data from
     var url = $("#datatablesSimpleDashScans").attr("report-url");
@@ -244,7 +244,7 @@ function scansDashboardRefresh() {
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 100000);
+    }, 30000);
 }
 
 $(document).ready(function(){

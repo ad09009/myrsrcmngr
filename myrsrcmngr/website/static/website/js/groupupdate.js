@@ -22,6 +22,7 @@ function GroupHostsTableRefresh() {
                 }
             },
         ],
+        order: [[0, 'desc']],
         pageLength: 10,
         lenghtChange: true,
         autoWidth: false,
@@ -32,7 +33,7 @@ function GroupHostsTableRefresh() {
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 10000);
+    }, 15000);
 }
 
 function GroupScansTableRefresh() {
@@ -94,6 +95,6 @@ $(document).ready(function(){
     GroupHostsTableRefresh();
     GroupScansTableRefresh();
     groupTotals();
-    setInterval(groupTotals, 7000);
+    setInterval(groupTotals, 20000);
 
 });

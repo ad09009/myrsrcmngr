@@ -46,7 +46,7 @@ function groupsTableRefresh() {
     } );
     setInterval(function() {
         table.ajax.reload();
-    }, 10000);
+    }, 40000);
 }
 
 var handle = null;
@@ -88,7 +88,7 @@ $(document).ready(function(){
     createGroupChart();
     groupsTableRefresh();
     groupsTotals();
-    setInterval(groupsTotals(), 20000);
+    setInterval(groupsTotals(), 21000);
 
     $.ajaxSetup({ cache:false });
 

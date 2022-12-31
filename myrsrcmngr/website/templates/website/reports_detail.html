@@ -240,8 +240,8 @@
                         {% else %}
                         <td>None</td>
                         {% endif %}
-                        <td><a href="{% url 'website:hosts-detail' host.id %}">{{ host.other_host_changes }}</a></td>
-                        <td><a href="{% url 'website:hosts-detail' host.id %}">{{ host.other_service_changes }}</a></td>
+                        <td>{{ host.other_host_changes }}</td>
+                        <td>{{ host.other_service_changes }}</td>
                     </tr>
                     {% endfor %}
                 <!--JSON response-->

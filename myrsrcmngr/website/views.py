@@ -173,7 +173,6 @@ def dashboard(request):
                 for change in rchanges:
                     counter = counter + 1
                     if change.attribute == 'hosts_up':
-                        print('hosts_up', change.cur_val, change.prev_val)
                         if change.prev_val is None:
                             change.prev_val = 0
                         report_changes['hosts_up'] = int(change.cur_val) - int(change.prev_val)
@@ -850,8 +849,6 @@ def hosts_chart(request):
         allhosts = hosts.objects.all().filter(status='up')
         color_codes = ['#' + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(10)]
         allhosts = allhosts.annotate(open_ports=Count('services__state', filter=Q(services__state='open'))).order_by('-open_ports')[:10]
-        for i in allhosts:
-            print(i)
         data = {
             'labels': [host.main_address for host in allhosts],
             'datasets': [{
