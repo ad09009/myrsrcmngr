@@ -6,12 +6,12 @@
     <div class="row">
         <div class="col-xl-10 col-md-10">
             <div class="card  mb-4">
-                <div class="card-header">Overview of service {{ services.name_conc }}
+                <div class="card-header">Overview of service {{ services.name_conc }} for host {{ services.host.main_address }}
                 </div>
 
                             <div class="card-body">
                                 {% if services %}
-                                <table id="datatablesSimple2" class="table">
+                                <table class="table">
                                     <thead>
                                         <tr>
                                             <th>Host Address</th>
@@ -28,7 +28,7 @@
                                     <tbody>
                                     
                                         <tr>
-                                            <td><a href="{% url 'website:hosts-detail' services.host %}">{{ services.host.main_address }}</a></td>
+                                            <td><a href="{% url 'website:hosts-detail' services.host.id %}">{{ services.host.main_address }}</a></td>
                                             <td>{{ services.port }}</td>
                                             <td>{{ services.state }}</td>
                                             <td>{{ services.protocol }}</td>
