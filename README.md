@@ -32,7 +32,18 @@ To install the project and its dependencies, first create and activate a dedicat
 #### 3. Install the necessary python packages from the requirements file:
    `$ pip install -r requirements.txt`
 
-#### 4. Set up the database (the default sqlite one):
+#### 4a. Set up a PostgreSQL database for the project:
+   `$ sudo apt-get install postgresql`
+
+   `$ sudo su - postgres`
+   
+   `$ createuser -P <username> `
+   
+   `$ createdb -O <username> <dbname>`
+
+#### 4b. Enter the created database name, user and password in the settings.py file under DATABASES configuration
+
+#### 4c. Migrate Django models to the newly created database
    `$ python manage.py makemigrations`
 
    `$ python manage.py migrate`
