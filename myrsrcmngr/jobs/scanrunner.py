@@ -277,7 +277,7 @@ class ScanRunner:
                                     except Exception as e:
                                         logger.exception(f"could not retrieve or create objects while adding service {aservice} on host {curhost.address} for diff service lvl change {attr}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
                                         continue
-                                    logger.info(f"successfully added service {servadr} to services and change {serv_in_changes} to changes")
+                                    logger.info(f"successfully added change {serv_in_changes} to changes")
                             else:
                                 logger.warning(f"This should never happen - Was not expecting an attribute when parsing host diff ADDED SERVICES {attr}")
                         logger.info(f"STARTING TO ITERATE OVER HOST LEVEL ({curhost}) diff REMOVED changes: SERVICE LEVEL")
@@ -300,7 +300,7 @@ class ScanRunner:
                                     except Exception as e:
                                         logger.exception(f"could not retrieve or create objects while removing service {rservice} on host {curhost.address} for diff service lvl change {attr}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
                                         continue
-                                    logger.info(f"successfully inserted removed service {servrem} to services and change {remserv_in_changes} to changes")
+                                    logger.info(f"successfully inserted removed service change {remserv_in_changes} to changes")
                             else:
                                 logger.warning(f"This should never happen - Was not expecting an attribute when parsing host diff REMOVED SERVICES {attr}")
                         logger.info(f"STARTING TO ITERATE OVER HOST LEVEL ({curhost}) diff CHANGED changes: SERVICE LEVEL")

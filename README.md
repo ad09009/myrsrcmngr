@@ -14,9 +14,9 @@ The project was developed on:
 - Python 3.10.6
 - Nmap 7.80
 
-The chosen database solutions (but other options compatible with Django should work just as well):
+The chosen database solutions:
 - sqlite3 3.37.2 (normally should already be included)
-- MariaDB 15.1
+- PostgreSQL 14.5
 
 
 ## Installation
@@ -63,7 +63,7 @@ To install the project and its dependencies, first create and activate a dedicat
 
 - Only non-sudo options for Nmap are supported (new ones should be added to the "scans" model)
 - Only one active scan per Group at a time is currently supported.
-- Running multiple scans at the same time is **not available for sqlite** . Set up MariaDB or other database engine to enable that.
+- Running multiple scans at the same time is **not available for sqlite** . Set up PostgreSQL or other database engine to enable that.
 
 
 ### Troubleshooting
