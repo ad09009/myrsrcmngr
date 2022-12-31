@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid px-4">
+    <h2 class="d-inline-block my-auto mt-4">Services</h2>
+    <div class="row">
+        <div class="col-xl-10 col-md-10">
+            <div class="card  mb-4">
+                <div class="card-header">Overview of service {{ services.name_conc }}
+                </div>
+
+                            <div class="card-body">
+                                {% if services %}
+                                <table id="datatablesSimple2" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Host Address</th>
+                                            <th>Port</th>
+                                            <th>State</th>
+                                            <th>Protocol</th>
+                                            <th>Service</th>
+                                            <th>Owner</th>
+                                            <th>Banner</th>
+                                            <th>Reason</th>
+                                            <th>Tunnel</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    
+                                        <tr>
+                                            <td><a href="{% url 'website:hosts-detail' services.host %}">{{ services.host.main_address }}</a></td>
+                                            <td>{{ services.port }}</td>
+                                            <td>{{ services.state }}</td>
+                                            <td>{{ services.protocol }}</td>
+                                            <td>{{ services.service }}</td>
+                                            <td>{{ services.owner }}</td>
+                                            <td>{{ services.banner }}</td>
+                                            <td>{{ services.reason }}</td>
+                                            <td>{{ services.tunnel }}</td>
+                                        </tr>
+                                    
+                    
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                <div class="card-body">    
+                                  <p>There are no services here to display </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{% static 'website/js/changes.js' %}"></script>
+{% endblock %}

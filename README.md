@@ -63,6 +63,7 @@ To install the project and its dependencies, first create and activate a dedicat
 
 - Only non-sudo options for Nmap are supported (new ones should be added to the "scans" model)
 - Only one active scan per Group at a time is currently supported.
+- Running multiple scans at the same time is **not available for sqlite** . Set up MariaDB or other database engine to enable that.
 
 
 ### Troubleshooting
