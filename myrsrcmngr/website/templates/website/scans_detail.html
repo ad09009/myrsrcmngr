@@ -54,8 +54,8 @@
                                         <button id="toggle-button" scan-ajax-target="{% url 'website:scan-toggle' scans.id %}" value="{{scans.active}}" class="btn btn-success d-inline-block my-auto">TURN ON</button>
                                         <input type="hidden" id="active" value="0">
                                     {% endif %}
-                                    <a href="{% url 'website:edit-scan' scans.id %}" class="btn btn-primary">Edit</a>
-                                    <a href="{% url 'website:delete-scan' scans.id %}" class="btn btn-primary">Delete</a>
+                                    <a href="{% url 'website:edit-scan' scans.id %}" id="editButton" class="btn btn-primary">Edit</a>
+                                    <a href="{% url 'website:delete-scan' scans.id %}" id="deleteButton" class="btn btn-primary">Delete</a>
                                 {% endif %}
                             </div>
                         </div>

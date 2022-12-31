@@ -25,6 +25,10 @@ function updateMsg() {
             $('#status-scanprogress').text(scanreturn['scan_status']);
             if (scanreturn['active'] == 'OFF'){
                 $('#toggle-button').prop('disabled', false);
+                $('#editButton').removeClass('disabled');
+                $('#deleteButton').removeClass('disabled');
+
+          
                 $('#next-exec-scanprogress').hide();
                 $('#scanprogress').hide();
             }
@@ -33,6 +37,8 @@ function updateMsg() {
                 
                 if (scanreturn['scan_status'] == "RUNNING"){
                     $('#toggle-button').prop('disabled', true);
+                    $("#editButton").addClass("disabled");
+                    $('#deleteButton').addClass("disabled");
                     $('#task-name-scanprogress').text(scanreturn['namet']);
                     $('#task-status-scanprogress').text(scanreturn['status']);
                     $('#task-progress-scanprogress').css('width', scanreturn['progress'] + '%').text(scanreturn['progress'] + '%');
@@ -41,6 +47,8 @@ function updateMsg() {
                 }
                 else {
                     $('#toggle-button').prop('disabled', false);
+                    $('#editButton').removeClass('disabled');
+                    $('#deleteButton').removeClass('disabled');
                     $('#scanprogress').hide();
                     $('#next-val-scanprogress').text(scanreturn['next_at']);
                     $('#next-exec-scanprogress').show();

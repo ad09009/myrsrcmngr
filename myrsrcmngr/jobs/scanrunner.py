@@ -1,5 +1,5 @@
 #import models
-from website.models import scans, resourcegroups, hosts, hosts_added_removed, reports, services, services_added_removed, changes
+from website.models import scans, resourcegroups, hosts, reports, services, changes
 
 from django.utils import timezone
 from libnmap.process import NmapProcess
@@ -267,12 +267,6 @@ class ScanRunner:
                                     try:
                                         dbservice_a = services.objects.get(host__main_address=curhost.address, port=aservice.port)
                                         host_to_serv = hosts.objects.get(main_address=curhost.address)
-                                        servadr = services_added_removed.objects.create(
-                                            cur_report=created_rep,
-                                            service=dbservice_a,
-                                            prev_report=previous,
-                                            status="ADDED"
-                                        )
                                         serv_in_changes = changes.objects.create(
                                             cur_report=created_rep,
                                             service=dbservice_a,
@@ -296,12 +290,6 @@ class ScanRunner:
                                     try:
                                         dbservice_r = services.objects.get(host__main_address=curhost.address, port=rservice.port)
                                         host_from_serv = hosts.objects.get(main_address=curhost.address)
-                                        servrem = services_added_removed.objects.create(
-                                            cur_report=created_rep,
-                                            service=dbservice_r,
-                                            prev_report=previous,
-                                            status="REMOVED"
-                                        )
                                         remserv_in_changes = changes.objects.create(
                                             cur_report=created_rep,
                                             service=dbservice_r,
@@ -380,18 +368,6 @@ class ScanRunner:
                     ahost = newrep.get_host_byid(nested[1])
                     try:
                         dbhost_a = hosts.objects.get(main_address=ahost.address)
-                        hadr = hosts_added_removed.objects.create(
-                            cur_report=created_rep,
-                            host=dbhost_a,
-                            prev_report=previous,
-                            status="ADDED"
-                        )
-                    except Exception as e:
-                        logger.exception(f"could not retrieve or create objects while inserting ADDED host {ahost.address} to hosts_added_removed for diff host lvl change {add}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
-                        continue
-                    logger.info(f"successfully inserted added host {ahost.address} to hosts_added_removed")
-                    
-                    try:
                         hadr_ch = changes.objects.create(
                             cur_report=created_rep,
                             host=dbhost_a,
@@ -406,12 +382,6 @@ class ScanRunner:
                     for aserv in ahost.services:
                         try:
                             dbserv_a = services.objects.get(host__main_address=ahost.address, port=aserv.port)
-                            sadr = services_added_removed.objects.create(
-                                cur_report=created_rep,
-                                service=dbserv_a,
-                                prev_report=previous,
-                                status="ADDED"
-                            )
                             sadr_ch = changes.objects.create(
                                 cur_report=created_rep,
                                 service=dbserv_a,
@@ -420,9 +390,9 @@ class ScanRunner:
                                 status="ADDED"
                             )
                         except Exception as e:
-                            logger.exception(f"could not retrieve or create objects while inserting ADDED service {aserv} to services_added_removed or changed for diff host lvl change {add}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
+                            logger.exception(f"could not retrieve or create objects while inserting ADDED service {aserv} to changed for diff host lvl change {add}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
                             continue
-                        logger.info(f"successfully inserted added service {aserv} to services_added_removed and changes")
+                        logger.info(f"successfully inserted added service {aserv} to changes")
                     
         logger.info("STARTING TO ITERATE OVER HOST LEVEL diff hosts REMOVED changes: HOST LEVEL")
         for rem in rep_ndiff.removed():
@@ -432,12 +402,6 @@ class ScanRunner:
                     rhost = oldrep.get_host_byid(nested[1])
                     try:
                         dbhost_r = hosts.objects.get(main_address=rhost.address)
-                        hadrgone = hosts_added_removed.objects.create(
-                            cur_report=created_rep,
-                            host=dbhost_r,
-                            prev_report=previous,
-                            status="REMOVED"
-                        )
                         hadrgone_ch = changes.objects.create(
                             cur_report=created_rep,
                             host=dbhost_r,
@@ -445,19 +409,13 @@ class ScanRunner:
                             status="REMOVED"
                         )
                     except Exception as e:
-                        logger.exception(f"could not retrieve or create objects while inserting REMOVED host {rhost.address} to hosts_added_removed or changes for diff host lvl change {rem}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
+                        logger.exception(f"could not retrieve or create objects while inserting REMOVED host {rhost.address} to changes for diff host lvl change {rem}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
                         continue
-                    logger.info(f"successfully inserted removed host {rhost.address} to hosts_added_removed and changes")
+                    logger.info(f"successfully inserted removed host {rhost.address} to changes")
                     logger.info("STARTING TO ITERATE OVER SERVICE LEVEL diff services REMOVED changes: SERVICE LEVEL")
                     for rserv in rhost.services:
                         try:
                             dbserv_r = services.objects.get(host_main_address=rhost.address, port=rserv.port)
-                            sadrgone = services_added_removed.objects.create(
-                                cur_report=created_rep,
-                                service=dbserv_r,
-                                prev_report=previous,
-                                status="REMOVED"
-                            )
                             sadrgone_ch = changes.objects.create(
                                 cur_report=created_rep,
                                 service=dbserv_r,
@@ -466,9 +424,9 @@ class ScanRunner:
                                 status="REMOVED"
                             )
                         except Exception as e:
-                            logger.exception(f"could not retrieve or create objects while inserting REMOVED service {rserv} to services_added_removed or changes for diff host lvl change {rem}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
+                            logger.exception(f"could not retrieve or create objects while inserting REMOVED service {rserv} to changes for diff host lvl change {rem}. TRYING TO CONTINUE ANYWAY. Django error: {e}")
                             continue
-                        logger.info(f"successfully inserted removed service {rserv} to services_added_removed and changes")
+                        logger.info(f"successfully inserted removed service {rserv} to changes")
         logger.info(f"Did not fail on the diff parse, wow, or at least got to the end of it, previous report was: {previous}, new rep - {created_rep}")
         return True
     
