@@ -12,6 +12,7 @@ package.json
 package-lock.json
 finalsettings.py
 datadump.json
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
